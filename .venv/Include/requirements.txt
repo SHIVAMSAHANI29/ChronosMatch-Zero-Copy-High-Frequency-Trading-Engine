@@ -1,0 +1,3 @@
+# ChronosMatch Week 1 uses only the Python standard library.
+# No external packages are required.
+# If later weeks add dependencies, list them here (one per line).

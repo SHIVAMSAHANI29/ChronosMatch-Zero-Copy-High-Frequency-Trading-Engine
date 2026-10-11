@@ -1,0 +1,75 @@
+# Requirements: ChronosMatch Week 1
+
+## 1. Source of requirements
+
+**Official (from the assignment letter):**
+- Project name: ChronosMatch: Zero-Copy High-Frequency Trading Engine
+- Internship domain: Python Development
+- Duration: one month
+- Week 1 focus: requirements analysis, environment setup, system design,
+  order data structures, and a basic order-matching engine
+
+**Everything else in this document is an assumption** made to create a
+reasonable educational implementation, because the letter gives no detailed
+technical specification.
+
+## 2. Functional requirements
+
+| ID | Requirement |
+|----|-------------|
+| FR1 | The system shall represent an order with ID, symbol, side, price, quantity, remaining quantity, sequence number, and timestamp. |
+| FR2 | The system shall support BUY and SELL limit orders. |
+| FR3 | The system shall reject orders with an invalid side, non-positive price, non-positive or non-integer quantity, invalid symbol, or empty ID. |
+| FR4 | The system shall keep BUY and SELL orders separately, per symbol. |
+| FR5 | The system shall order BUY orders by highest price then earliest sequence, and SELL orders by lowest price then earliest sequence. |
+| FR6 | The system shall execute a trade when the best buy price is greater than or equal to the best sell price for the same symbol. |
+| FR7 | The system shall execute each trade at the resting order's price. |
+| FR8 | The system shall support partial fills and update remaining quantities. |
+| FR9 | The system shall remove fully filled orders from the order book. |
+| FR10 | The system shall leave unmatched quantity in the order book. |
+| FR11 | The system shall never match orders of different symbols. |
+| FR12 | The system shall reject duplicate order IDs, including IDs of already-filled orders. |
+| FR13 | The system shall record every trade with ID, symbol, price, quantity, buy order ID, sell order ID, and timestamp. |
+| FR14 | The system shall provide a command-line demo that prints submissions, trades, open orders, total trades, and total traded quantity. |
+| FR15 | The system shall provide an optional benchmark with a configurable order count. |
+
+## 3. Non-functional requirements
+
+| ID | Requirement |
+|----|-------------|
+| NFR1 | **Correctness first:** exact decimal arithmetic for prices. |
+| NFR2 | **Readability:** modular code with type hints, docstrings, and meaningful names. |
+| NFR3 | **Testability:** automated tests with the built-in `unittest` framework. |
+| NFR4 | **Portability:** Python 3.11+, standard library only. |
+| NFR5 | **Safety:** a rejected order must leave the engine's state unchanged. |
+| NFR6 | **Determinism:** priority must not depend on the wall clock. |
+| NFR7 | **Honesty:** documentation must not claim zero-copy or production-grade performance, and must not contain fabricated results. |
+
+## 4. Assumptions
+
+1. Only limit orders are supported.
+2. Symbols are 1-10 uppercase letters (input is uppercased automatically).
+3. Quantities are whole numbers of shares.
+4. Prices are positive `Decimal` values; floats are rejected.
+5. Time priority is defined by a strictly increasing sequence number.
+6. Order IDs are unique for the engine's lifetime.
+7. The currency symbol (₹) is for display only; the engine has no currency concept.
+8. Single-threaded, in-memory operation.
+
+## 5. Scope of Week 1
+
+In scope: requirements analysis, VS Code environment setup, modular structure,
+order and trade models, order book, basic matching engine, partial fills,
+price-time priority, validation, unit tests, demo, simple benchmark,
+documentation.
+
+## 6. Out of scope for Week 1
+
+- Market orders, stop orders, and other order types
+- Cancellation and modification
+- Multi-threading or concurrency
+- Networking, APIs, or a user interface
+- Databases or persistence
+- Real market data
+- Real zero-copy or low-latency optimization
+- Fees, accounts, balances, or risk checks
