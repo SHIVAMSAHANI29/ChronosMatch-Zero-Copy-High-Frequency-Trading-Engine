@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ChronosMatch | Trading Dashboard</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1020;--panel:#121a2d;--panel2:#18233a;--line:#263550;--text:#e8eef9;--muted:#95a6c4;--green:#35d49a;--red:#ff6b7d;--blue:#80aaff;--amber:#f7c66a}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#172746 0,#0b1020 52%);color:var(--text);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+    header{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:22px clamp(16px,4vw,48px);border-bottom:1px solid var(--line);background:#0b1020d9;position:sticky;top:0;z-index:2;backdrop-filter:blur(12px)}
+    .brand{display:flex;gap:12px;align-items:center}.logo{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,#6b8cff,#45dfb3);display:grid;place-items:center;color:#091221;font-size:22px;font-weight:900}.brand h1{font-size:18px;margin:0;letter-spacing:.2px}.brand p{margin:2px 0 0;color:var(--muted);font-size:12px}
+    .status{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}.dot{width:8px;height:8px;background:var(--green);border-radius:50%;box-shadow:0 0 12px #35d49a80}
+    main{max-width:1440px;margin:auto;padding:26px clamp(16px,4vw,48px) 50px}.section-title{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:0 0 15px}.section-title h2{font-size:16px;margin:0}.section-title p{margin:3px 0 0;color:var(--muted);font-size:12px}
+    .metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:26px}.metric,.panel{border:1px solid var(--line);background:linear-gradient(145deg,#151f34ed,#10182aee);border-radius:17px;box-shadow:0 12px 30px #00000012}.metric{padding:18px}.metric .label{color:var(--muted);font-size:12px}.metric .value{font-size:28px;font-weight:750;margin-top:7px;letter-spacing:-.8px}.metric .sub{color:var(--muted);font-size:11px;margin-top:3px}
+    .layout{display:grid;grid-template-columns:minmax(300px,.8fr) minmax(0,1.6fr);gap:16px;align-items:start}.panel{padding:20px;margin-bottom:16px}.panel h3{margin:0 0 4px;font-size:15px}.hint{margin:0 0 17px;color:var(--muted);font-size:12px}
+    label{display:block;font-size:12px;color:#b7c5dc;margin:0 0 6px}input,select{width:100%;background:#0b1324;color:var(--text);border:1px solid #2a3a56;border-radius:9px;padding:11px 12px;font:inherit;outline:none}input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px #80aaff1b}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.field{margin-bottom:13px}.field.full{grid-column:1/-1}
+    button{border:0;border-radius:9px;padding:11px 14px;font:600 13px inherit;cursor:pointer;transition:transform .12s,opacity .12s}button:hover{transform:translateY(-1px)}button:disabled{opacity:.5;cursor:wait}.primary{background:linear-gradient(120deg,#88aaff,#65dfc1);color:#071326;width:100%;margin-top:2px}.secondary{background:#22314b;color:var(--text)}.cancel{background:#492333;color:#ff9dac;padding:7px 10px;font-size:11px}
+    .message{display:none;margin-top:12px;border-radius:9px;padding:10px 12px;font-size:12px;overflow-wrap:anywhere}.message.ok{display:block;background:#12362e;color:#8ff0cc}.message.err{display:block;background:#40202a;color:#ffabb7}
+    .book-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.side-title{font-size:12px;font-weight:700;margin-bottom:9px}.bid{color:var(--green)}.ask{color:var(--red)}.table-wrap{overflow:auto;max-width:100%}table{border-collapse:collapse;width:100%;font-size:12px;white-space:nowrap}th{text-align:left;color:var(--muted);font-weight:500;background:#111a2b}th,td{padding:10px 11px;border-bottom:1px solid #24314a}tbody tr:hover{background:#ffffff05}tbody tr:last-child td{border-bottom:0}.empty{text-align:center;color:var(--muted);padding:22px 10px}.pill{display:inline-block;padding:3px 7px;border-radius:6px;font-size:10px;font-weight:700}.pill.BUY{background:#123b32;color:#6de4bb}.pill.SELL{background:#46222c;color:#ff9eaa}.pill.FILLED{background:#183b32;color:#79e7bd}.pill.NEW,.pill.PARTIALLY_FILLED{background:#293858;color:#a8c4ff}.pill.CANCELLED{background:#383044;color:#c7b7df}.top-actions{display:flex;gap:8px;align-items:center}.small-select{width:auto;min-width:100px;padding:8px}.footer{color:#7384a3;font-size:11px;text-align:center;margin-top:22px}.mono{font-variant-numeric:tabular-nums;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+    @media(max-width:900px){.layout{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){header{align-items:flex-start}.metrics{gap:9px}.metric{padding:13px}.metric .value{font-size:23px}.panel{padding:15px}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.book-grid{grid-template-columns:1fr}.status{font-size:0}.status .dot{width:10px;height:10px}.section-title{align-items:start;flex-direction:column}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="logo">C</div><div><h1>ChronosMatch</h1><p>Limit order matching · Phase 3 dashboard</p></div></div>
+  <div class="status"><span class="dot" id="healthDot"></span><span id="healthText">Connecting to engine…</span></div>
+</header>
+<main>
+  <div class="section-title"><div><h2>Market overview</h2><p>Live view of the local matching engine</p></div><div class="top-actions"><select id="symbolFilter" class="small-select" aria-label="Filter symbol"><option value="">All symbols</option></select><button class="secondary" id="refreshBtn">Refresh</button></div></div>
+  <section class="metrics">
+    <div class="metric"><div class="label">Accepted orders</div><div class="value" id="accepted">—</div><div class="sub">Lifetime in current journal</div></div>
+    <div class="metric"><div class="label">Active orders</div><div class="value" id="active">—</div><div class="sub">Resting in order books</div></div>
+    <div class="metric"><div class="label">Executed trades</div><div class="value" id="tradeCount">—</div><div class="sub">Matched executions</div></div>
+    <div class="metric"><div class="label">Quantity traded</div><div class="value" id="tradedQty">—</div><div class="sub">Total units executed</div></div>
+  </section>
+  <div class="layout">
+    <div>
+      <section class="panel">
+        <h3>Place limit order</h3><p class="hint">Crossing orders match by price-time priority. Execution uses the resting order’s price.</p>
+        <form id="orderForm">
+          <div class="form-grid">
+            <div class="field"><label for="symbol">Symbol</label><input id="symbol" name="symbol" placeholder="e.g. AAPL" maxlength="10" required pattern="[A-Za-z0-9]{1,10}"></div>
+            <div class="field"><label for="side">Side</label><select id="side" name="side"><option value="BUY">BUY</option><option value="SELL">SELL</option></select></div>
+            <div class="field"><label for="price">Limit price</label><input id="price" name="price" placeholder="100.2500" inputmode="decimal" required pattern="[0-9]+([.][0-9]{1,4})?"></div>
+            <div class="field"><label for="quantity">Quantity</label><input id="quantity" name="quantity" type="number" min="1" max="1000000000" step="1" placeholder="10" required></div>
+            <div class="field full"><label for="orderId">Order ID (optional)</label><input id="orderId" name="orderId" placeholder="Auto-generated if blank" maxlength="64"></div>
+          </div>
+          <button class="primary" id="submitBtn" type="submit">Submit order</button><div id="orderMessage" class="message" role="status"></div>
+        </form>
+      </section>
+      <section class="panel"><h3>Current order book</h3><p class="hint">Aggregated depth for the selected symbol.</p>
+        <div class="field"><label for="bookSymbol">Book symbol</label><input id="bookSymbol" value="AAPL" maxlength="10" placeholder="AAPL"></div>
+        <div class="book-grid"><div><div class="side-title bid">BIDS · BUY</div><div id="bids" class="table-wrap"></div></div><div><div class="side-title ask">ASKS · SELL</div><div id="asks" class="table-wrap"></div></div></div>
+      </section>
+    </div>
+    <div>
+      <section class="panel"><div class="section-title"><div><h3>Open orders</h3><p>Active orders awaiting execution or cancellation</p></div><span id="openCount" class="pill NEW">0 orders</span></div>
+        <div id="ordersTable" class="table-wrap"></div>
+      </section>
+      <section class="panel"><div class="section-title"><div><h3>Recent trades</h3><p>Latest executions from the engine</p></div><span class="pill FILLED">Execution tape</span></div>
+        <div id="tradesTable" class="table-wrap"></div>
+      </section>
+    </div>
+  </div>
+  <p class="footer">ChronosMatch is an educational simulator, not a production exchange. Data persists locally in SQLite.</p>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const num = (v) => Number(v || 0).toLocaleString();
+const safe = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function api(url, options={}) {
+  const res = await fetch(url, {headers:{'Content-Type':'application/json', ...(options.headers||{})}, ...options});
+  let data={}; try { data=await res.json(); } catch {}
+  if(!res.ok) throw new Error(data.detail || `Request failed (${res.status})`);
+  return data;
+}
+function table(headers, rows, empty) {
+  if(!rows.length) return `<div class="empty">${safe(empty)}</div>`;
+  return `<table><thead><tr>${headers.map(h=>`<th>${safe(h)}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>`;
+}
+function pill(value){return `<span class="pill ${safe(value)}">${safe(value)}</span>`}
+function showMessage(text, ok=false) {const el=$('orderMessage');el.textContent=text;el.className='message '+(ok?'ok':'err')}
+async function refresh() {
+  try {
+    const [stats, orders, trades, symbols, health] = await Promise.all([
+      api('/stats'), api('/orders?active_only=true'), api('/trades?limit=30'), api('/symbols'), api('/health')
+    ]);
+    $('healthDot').style.background='#35d49a'; $('healthText').textContent=health.persistence==='sqlite'?'Engine online · SQLite persistence':'Engine online · in-memory mode';
+    $('accepted').textContent=num(stats.orders_accepted); $('active').textContent=num(stats.active_orders);
+    $('tradeCount').textContent=num(stats.trades); $('tradedQty').textContent=num(stats.traded_quantity);
+    const filter=$('symbolFilter'), prior=filter.value;
+    filter.innerHTML='<option value="">All symbols</option>'+symbols.symbols.map(s=>`<option value="${safe(s)}">${safe(s)}</option>`).join('');
+    if(symbols.symbols.includes(prior)) filter.value=prior;
+    const chosen=filter.value;
+    const filtered=chosen?orders.orders.filter(o=>o.symbol===chosen):orders.orders;
+    $('openCount').textContent=`${filtered.length} orders`;
+    $('ordersTable').innerHTML=table(['ID','Symbol','Side','Price','Remaining','Status','Action'], filtered.map(o=>`<tr><td class="mono">${safe(o.order_id)}</td><td>${safe(o.symbol)}</td><td>${pill(o.side)}</td><td class="mono">${safe(o.price)}</td><td>${num(o.remaining)}</td><td>${pill(o.status)}</td><td><button class="cancel" data-cancel="${safe(o.order_id)}">Cancel</button></td></tr>`), 'No open orders');
+    const visibleTrades=chosen?trades.trades.filter(t=>t.symbol===chosen):trades.trades;
+    $('tradesTable').innerHTML=table(['Trade','Symbol','Price','Qty','Buy order','Sell order'], visibleTrades.map(t=>`<tr><td class="mono">${safe(t.trade_id)}</td><td>${safe(t.symbol)}</td><td class="mono">${safe(t.price)}</td><td>${num(t.quantity)}</td><td class="mono">${safe(t.buy_order_id)}</td><td class="mono">${safe(t.sell_order_id)}</td></tr>`), 'No trades yet');
+    await refreshBook();
+  } catch(e) {
+    $('healthDot').style.background='#ff6b7d'; $('healthText').textContent='API connection failed';
+    console.error(e);
+  }
+}
+async function refreshBook() {
+  const sym=$('bookSymbol').value.trim().toUpperCase();
+  if(!sym){$('bids').innerHTML='<div class="empty">Enter a symbol</div>';$('asks').innerHTML='<div class="empty">Enter a symbol</div>';return}
+  try {
+    const book=await api('/order-book/'+encodeURIComponent(sym));
+    const render=levels=>table(['Price','Quantity','Orders'],levels.map(l=>`<tr><td class="mono">${safe(l.price)}</td><td>${num(l.quantity)}</td><td>${num(l.orders)}</td></tr>`),'No levels');
+    $('bids').innerHTML=render(book.bids); $('asks').innerHTML=render(book.asks);
+  } catch(e) { $('bids').innerHTML=`<div class="empty">${safe(e.message)}</div>`; $('asks').innerHTML='<div class="empty">—</div>'; }
+}
+$('orderForm').addEventListener('submit', async e=>{
+  e.preventDefault(); $('submitBtn').disabled=true;
+  const body={symbol:$('symbol').value.trim().toUpperCase(),side:$('side').value,price:$('price').value.trim(),quantity:Number($('quantity').value)};
+  if($('orderId').value.trim()) body.order_id=$('orderId').value.trim();
+  try {
+    const result=await api('/orders',{method:'POST',body:JSON.stringify(body)});
+    const order=result.order, n=result.trades.length;
+    showMessage(`Order ${order.order_id} accepted · ${order.status} · ${n} trade(s) executed`,true);
+    $('bookSymbol').value=order.symbol; $('symbolFilter').value=order.symbol;
+    $('orderId').value=''; $('quantity').value=''; await refresh();
+  } catch(err) { showMessage(err.message,false); }
+  finally { $('submitBtn').disabled=false; }
+});
+document.addEventListener('click',async e=>{
+  const button=e.target.closest('[data-cancel]'); if(!button)return;
+  button.disabled=true;
+  try {await api('/orders/'+encodeURIComponent(button.dataset.cancel),{method:'DELETE'});await refresh();}
+  catch(err){alert(err.message);button.disabled=false;}
+});
+$('refreshBtn').addEventListener('click',refresh);
+$('symbolFilter').addEventListener('change',refresh);
+$('bookSymbol').addEventListener('change',refreshBook);
+$('bookSymbol').addEventListener('keydown',e=>{if(e.key==='Enter')refreshBook()});
+refresh(); setInterval(refresh,5000);
+</script>
+</body>
+</html>
