@@ -26,6 +26,8 @@ class SQLiteJournal:
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA journal_mode=WAL")
         connection.execute("PRAGMA foreign_keys=ON")
+        connection.execute("PRAGMA busy_timeout=10000")
+        connection.execute("PRAGMA synchronous=FULL")
         return connection
 
     def _initialize(self) -> None:
@@ -42,7 +44,10 @@ class SQLiteJournal:
     def append(self, action: str, payload: dict[str, Any]) -> None:
         if action not in {"submit", "cancel"}:
             raise ValueError(f"Unsupported journal action: {action}")
-        encoded = json.dumps(payload, separators=(",", ":"), sort_keys=True)
+        if not isinstance(payload, dict):
+            raise TypeError("journal payload must be a dictionary")
+        # Validate serializability before opening a database transaction.
+        encoded = json.dumps(payload, separators=(",", ":"), sort_keys=True, allow_nan=False)
         with self._lock, self._connect() as conn:
             conn.execute(
                 "INSERT INTO command_log(action, payload) VALUES (?, ?)",
