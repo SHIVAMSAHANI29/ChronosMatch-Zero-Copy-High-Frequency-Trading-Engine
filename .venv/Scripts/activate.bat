@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set VIRTUAL_ENV=D:\Python Development\.venv
+set VIRTUAL_ENV=D:\Chronos Project\ChronosMatch_Phase3_Full_Application\ChronosMatch\.venv
 
 if not defined PROMPT set PROMPT=$P$G
 
