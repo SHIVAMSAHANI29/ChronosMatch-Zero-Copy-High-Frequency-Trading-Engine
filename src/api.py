@@ -1,14 +1,19 @@
 """FastAPI REST API and dashboard serving for ChronosMatch."""
 from __future__ import annotations
 
+import os
+import httpx
 import logging
 import threading
+import time
+from collections import defaultdict, deque
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Query, status
 from fastapi.responses import FileResponse
+from dotenv import load_dotenv
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from .config import load_settings
@@ -25,6 +30,8 @@ from .models import (
 from .persistence import SQLiteJournal
 
 logger = logging.getLogger(__name__)
+load_dotenv()
+API_KEY = os.getenv("SA5HGMO3LBEAEZ00")
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DASHBOARD_FILE = PROJECT_ROOT / "frontend" / "index.html"
 
@@ -73,6 +80,9 @@ def create_app(
     use_persistence = (engine is None) if persist is None else persist
     resolved_db = Path(db_path) if db_path is not None else settings.db_path
     mutation_lock = threading.RLock()
+    # Per-process limiter; use a shared gateway for multi-worker deployments.
+    request_times: dict[str, deque[float]] = defaultdict(deque)
+    rate_lock = threading.Lock()
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -105,6 +115,34 @@ def create_app(
     app.state.journal = None
     app.state.replayed_commands = 0
 
+    @app.middleware("http")
+    async def protect_requests(request, call_next):
+        """Enforce configured body-size and per-client request limits."""
+        from fastapi.responses import JSONResponse
+        content_length = request.headers.get("content-length")
+        if content_length:
+            try:
+                if int(content_length) > settings.max_request_bytes:
+                    return JSONResponse(status_code=413, content={"detail": "Request body exceeds configured size limit"})
+            except ValueError:
+                return JSONResponse(status_code=400, content={"detail": "Invalid Content-Length header"})
+        limit = settings.rate_limit_per_minute
+        if limit > 0:
+            client = request.client.host if request.client else "unknown"
+            now = time.monotonic()
+            with rate_lock:
+                window = request_times[client]
+                while window and now - window[0] >= 60:
+                    window.popleft()
+                if len(window) >= limit:
+                    return JSONResponse(status_code=429, content={"detail": "Rate limit exceeded; retry shortly"}, headers={"Retry-After": "60"})
+                window.append(now)
+                if len(request_times) > 2048:
+                    stale = [key for key, values in request_times.items() if not values or now - values[-1] >= 60]
+                    for key in stale:
+                        request_times.pop(key, None)
+        return await call_next(request)
+
     def get_engine() -> MatchingEngine:
         return app.state.engine
 
@@ -117,7 +155,59 @@ def create_app(
             raise HTTPException(status_code=500, detail="Dashboard file is missing")
         return FileResponse(DASHBOARD_FILE, media_type="text/html")
 
-    @app.get("/api", tags=["system"])
+    @app.get("/market/price/{symbol)", tags=["market data"])
+    async def get_stock_price(symbol: str) -> dict[str, Any]:
+        if not API_KEY:
+            raise HTTPException(
+                status_code=500,
+                detail="Market data API key is missing",
+            )
+
+        params = {
+            "symbol": symbol.upper(),
+            "exchange": "NSE",
+            "apikey": API_KEY,
+        }
+
+        try:
+            async with httpx.AsyncClient(timeout=10) as client:
+                response = await client.get(
+                    "https://api.SA5HGMO3LBEAEZ00.com/quote",
+                    params=params,
+                )
+                response.raise_for_status()
+                data = response.json()
+        except httpx.HTTPError as exc:
+            logger.exception("Market data provider request failed")
+            raise HTTPException(
+                status_code=502,
+                detail="Unable to contact market data provider",
+            ) from exc
+
+        if "close" not in data:
+            raise HTTPException(
+                status_code=502,
+                detail=data.get("message", "Price unavailable"),
+            )
+
+        try:
+            price = float(data["close"])
+        except (TypeError, ValueError) as exc:
+            raise HTTPException(
+                status_code=502,
+                detail="Market data provider returned an invalid price",
+            ) from exc
+
+        return {
+            "symbol": data.get("symbol", symbol.upper()),
+            "price": price,
+            "open": data.get("open"),
+            "high": data.get("high"),
+            "low": data.get("low"),
+            "volume": data.get("volume"),
+            "timestamp": data.get("datetime"),
+            "source": "Twelve Data",
+        }
     def api_info() -> dict[str, str]:
         return {"name": "ChronosMatch API", "docs": "/docs", "dashboard": "/"}
 
@@ -125,8 +215,10 @@ def create_app(
     def health() -> dict[str, Any]:
         return {
             "status": "ok",
+            "service": "chronosmatch",
             "persistence": "sqlite" if get_journal() else "disabled",
             "replayed_commands": app.state.replayed_commands,
+            "symbols": len(get_engine().symbols()),
         }
 
     @app.post("/orders", status_code=status.HTTP_201_CREATED, tags=["orders"])
@@ -245,6 +337,7 @@ def create_app(
         return get_engine().stats()
 
     return app
+
 
 
 app = create_app()
