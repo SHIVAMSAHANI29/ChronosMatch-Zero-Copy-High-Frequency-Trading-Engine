@@ -1,141 +1,947 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ChronosMatch | Trading Dashboard</title>
-  <style>
-    :root{color-scheme:dark;--bg:#0b1020;--panel:#121a2d;--panel2:#18233a;--line:#263550;--text:#e8eef9;--muted:#95a6c4;--green:#35d49a;--red:#ff6b7d;--blue:#80aaff;--amber:#f7c66a}
-    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#172746 0,#0b1020 52%);color:var(--text);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial,sans-serif}
-    header{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:22px clamp(16px,4vw,48px);border-bottom:1px solid var(--line);background:#0b1020d9;position:sticky;top:0;z-index:2;backdrop-filter:blur(12px)}
-    .brand{display:flex;gap:12px;align-items:center}.logo{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,#6b8cff,#45dfb3);display:grid;place-items:center;color:#091221;font-size:22px;font-weight:900}.brand h1{font-size:18px;margin:0;letter-spacing:.2px}.brand p{margin:2px 0 0;color:var(--muted);font-size:12px}
-    .status{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}.dot{width:8px;height:8px;background:var(--green);border-radius:50%;box-shadow:0 0 12px #35d49a80}
-    main{max-width:1440px;margin:auto;padding:26px clamp(16px,4vw,48px) 50px}.section-title{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:0 0 15px}.section-title h2{font-size:16px;margin:0}.section-title p{margin:3px 0 0;color:var(--muted);font-size:12px}
-    .metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:26px}.metric,.panel{border:1px solid var(--line);background:linear-gradient(145deg,#151f34ed,#10182aee);border-radius:17px;box-shadow:0 12px 30px #00000012}.metric{padding:18px}.metric .label{color:var(--muted);font-size:12px}.metric .value{font-size:28px;font-weight:750;margin-top:7px;letter-spacing:-.8px}.metric .sub{color:var(--muted);font-size:11px;margin-top:3px}
-    .layout{display:grid;grid-template-columns:minmax(300px,.8fr) minmax(0,1.6fr);gap:16px;align-items:start}.panel{padding:20px;margin-bottom:16px}.panel h3{margin:0 0 4px;font-size:15px}.hint{margin:0 0 17px;color:var(--muted);font-size:12px}
-    label{display:block;font-size:12px;color:#b7c5dc;margin:0 0 6px}input,select{width:100%;background:#0b1324;color:var(--text);border:1px solid #2a3a56;border-radius:9px;padding:11px 12px;font:inherit;outline:none}input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px #80aaff1b}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.field{margin-bottom:13px}.field.full{grid-column:1/-1}
-    button{border:0;border-radius:9px;padding:11px 14px;font:600 13px inherit;cursor:pointer;transition:transform .12s,opacity .12s}button:hover{transform:translateY(-1px)}button:disabled{opacity:.5;cursor:wait}.primary{background:linear-gradient(120deg,#88aaff,#65dfc1);color:#071326;width:100%;margin-top:2px}.secondary{background:#22314b;color:var(--text)}.cancel{background:#492333;color:#ff9dac;padding:7px 10px;font-size:11px}
-    .message{display:none;margin-top:12px;border-radius:9px;padding:10px 12px;font-size:12px;overflow-wrap:anywhere}.message.ok{display:block;background:#12362e;color:#8ff0cc}.message.err{display:block;background:#40202a;color:#ffabb7}
-    .book-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.side-title{font-size:12px;font-weight:700;margin-bottom:9px}.bid{color:var(--green)}.ask{color:var(--red)}.table-wrap{overflow:auto;max-width:100%}table{border-collapse:collapse;width:100%;font-size:12px;white-space:nowrap}th{text-align:left;color:var(--muted);font-weight:500;background:#111a2b}th,td{padding:10px 11px;border-bottom:1px solid #24314a}tbody tr:hover{background:#ffffff05}tbody tr:last-child td{border-bottom:0}.empty{text-align:center;color:var(--muted);padding:22px 10px}.pill{display:inline-block;padding:3px 7px;border-radius:6px;font-size:10px;font-weight:700}.pill.BUY{background:#123b32;color:#6de4bb}.pill.SELL{background:#46222c;color:#ff9eaa}.pill.FILLED{background:#183b32;color:#79e7bd}.pill.NEW,.pill.PARTIALLY_FILLED{background:#293858;color:#a8c4ff}.pill.CANCELLED{background:#383044;color:#c7b7df}.top-actions{display:flex;gap:8px;align-items:center}.small-select{width:auto;min-width:100px;padding:8px}.footer{color:#7384a3;font-size:11px;text-align:center;margin-top:22px}.mono{font-variant-numeric:tabular-nums;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
-    @media(max-width:900px){.layout{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){header{align-items:flex-start}.metrics{gap:9px}.metric{padding:13px}.metric .value{font-size:23px}.panel{padding:15px}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.book-grid{grid-template-columns:1fr}.status{font-size:0}.status .dot{width:10px;height:10px}.section-title{align-items:start;flex-direction:column}}
-  </style>
+<meta charset="utf-8">
+<title>Chronosmatch -Zero-fee copy trading</title>
+<title>ChronosMatch - Explore Stocks & Copy-Trading Demo</title>
+
+<meta name="description"
+content="Explore stocks, view market-style dashboards, track a demo portfolio, and try a zero-copy-fee trading experience with ChronosMatch. Demo interface; quotes and portfolio data are simulated.">
+
+<meta name="keywords"
+content="ChronosMatch, stock market dashboard, stock trading demo, copy trading demo, trading engine, portfolio tracker">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="chronosmatch-api" content="">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root{--bg:#fff;--panel:#fff;--soft:#f5f6f8;--ink:#44475b;--hd:#1a1c29;--muted:#7c7e8c;--line:#e9e9eb;--brand:#00b386;--bink:#fff;--up:#00a37a;--dn:#eb5b3c;--blue:#5367ff;
+ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121316;--panel:#1c1d22;--soft:#26272d;--ink:#c9cbd6;--hd:#f1f2f6;--muted:#9a9ca8;--line:#2f3037;--brand:#2ed3a6;--bink:#0c1a16;--up:#2ed3a6;--dn:#ff7a5c;--blue:#8c9bff}}
+:root[data-theme="dark"]{--bg:#121316;--panel:#1c1d22;--soft:#26272d;--ink:#c9cbd6;--hd:#f1f2f6;--muted:#9a9ca8;--line:#2f3037;--brand:#2ed3a6;--bink:#0c1a16;--up:#2ed3a6;--dn:#ff7a5c;--blue:#8c9bff}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;transition:background .2s}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:20}
+a{color:inherit;text-decoration:none}button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.up{color:var(--up)}.dn{color:var(--dn)}
+h1,h2,h3{color:var(--hd);margin:0}
+header{background:var(--bg);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:15}
+.bar{max-width:1100px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.logo{font-weight:700;font-size:20px;color:var(--hd);display:flex;align-items:center;gap:8px}
+.logo b{width:26px;height:26px;border-radius:7px;background:var(--brand);color:var(--bink);display:grid;place-items:center;font-size:15px}
+nav{display:flex;gap:2px}
+nav a{padding:6px 12px;border-radius:8px;font-weight:500;color:var(--muted)}
+nav a.on{color:var(--hd);background:var(--soft)}
+.sw{position:relative;flex:1;min-width:200px;max-width:380px;margin-left:auto}
+.sw input{width:100%;padding:9px 14px;border:1px solid var(--line);background:var(--soft);border-radius:10px}
+#res{position:absolute;top:44px;left:0;right:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.14);overflow:hidden;display:none}
+#res a{display:flex;gap:10px;align-items:center;padding:9px 12px}#res a:hover{background:var(--soft)}
+.btn{border:1px solid var(--line);background:var(--panel);padding:8px 16px;border-radius:8px;cursor:pointer;font-weight:500}
+.btn.pri{background:var(--brand);border-color:var(--brand);color:var(--bink);font-weight:600}
+.btn.sm{padding:4px 10px;font-size:13px}
+.btn:hover{filter:brightness(.95)}
+main{max-width:1100px;margin:0 auto;padding:24px 20px 50px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.box-h{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;gap:10px;flex-wrap:wrap}
+.sec{font-size:18px;font-weight:600;color:var(--hd);margin:26px 0 12px}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th,td{padding:12px 18px;border-top:1px solid var(--line);text-align:left}
+th{font-size:12px;color:var(--muted);font-weight:500;white-space:nowrap}th.num{text-align:right}
+tbody tr.go{cursor:pointer}tbody tr.go:hover{background:var(--soft)}
+.av{width:36px;height:36px;border-radius:50%;display:inline-grid;place-items:center;font-size:12px;font-weight:700;color:#fff;flex:none}
+.nm{display:flex;align-items:center;gap:12px}.nm b{color:var(--hd);font-weight:600;display:block}.nm small{color:var(--muted);font-size:12px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.cards.i{grid-template-columns:repeat(3,1fr)}
+@media(max-width:800px){.cards{grid-template-columns:1fr 1fr}.cards.i{grid-template-columns:1fr}}
+.card{padding:16px;display:block}.card:hover{border-color:var(--brand)}
+.card .av{margin-bottom:12px}.card b{display:block;color:var(--hd)}.card .p{margin-top:10px;font-weight:600;color:var(--hd)}
+.idx{padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
+.idx b{color:var(--hd)}
+.split{height:5px;background:var(--dn);opacity:.85;border-radius:3px;overflow:hidden;min-width:70px}.split i{display:block;height:100%;background:var(--up)}
+.fu{animation:fu 1s}.fd{animation:fd 1s}
+@keyframes fu{from{background:rgba(0,179,134,.22)}}@keyframes fd{from{background:rgba(235,91,60,.22)}}
+.two{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(0,1fr);gap:16px;align-items:stretch}
+.two > div {
+    min-width: 0;
+}
+
+.two .tape {
+    max-height: none;
+    overflow-y: visible;
+}
+@media(max-width:900px){.two{grid-template-columns:1fr}}
+.tape{height: 100%;
+    min-height: 420px;
+    max-height: 650px;
+    overflow-y: auto;}
+.tape div{display:grid;grid-template-columns:62px 1fr auto auto;gap:8px;padding:8px 18px;border-top:1px solid var(--line);font-size:13px}
+.tape .t,.co{color:var(--muted)}
+.live::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--up);margin-right:6px;animation:p 1.6s infinite}
+@keyframes p{50%{opacity:.25}}
+.big{font-size:30px;font-weight:600;color:var(--hd);margin-top:14px}
+.chart{padding:8px 18px 18px}.chart svg{width:100%;height:230px;display:block}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+.stats div{padding:12px 18px;border-top:1px solid var(--line)}.stats span{font-size:12px;color:var(--muted);display:block}.stats b{color:var(--hd)}
+.ord{padding:18px;position:sticky;top:76px}
+.seg{display:flex;gap:6px;margin-bottom:6px}
+.seg button{flex:1;padding:8px;border:0;background:none;border-bottom:2px solid transparent;cursor:pointer;font-weight:600;color:var(--muted)}
+.seg button.on[data-side="BUY"]{color:var(--up);border-color:var(--up)}.seg button.on[data-side="SELL"]{color:var(--dn);border-color:var(--dn)}
+.ord label,.f label{display:block;font-size:12px;color:var(--muted);margin:12px 0 4px}
+input,select{padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);width:100%}
+.rq{display:flex;justify-content:space-between;margin-top:16px;padding-top:12px;border-top:1px dashed var(--line)}.rq b{color:var(--hd)}
+.go2{width:100%;margin-top:14px;padding:12px;border:0;border-radius:8px;font-weight:600;font-size:15px;cursor:pointer;color:#fff;background:var(--up)}
+.go2.s{background:var(--dn)}
+.msg{font-size:13px;margin-top:8px;min-height:18px}
+.strip{display:grid;grid-template-columns:repeat(4,1fr)}.strip div{padding:16px 20px;border-right:1px solid var(--line)}.strip div:last-child{border:0}.strip span{font-size:12px;color:var(--muted)}.strip b{display:block;font-size:20px;color:var(--hd)}
+@media(max-width:700px){.strip{grid-template-columns:1fr 1fr}}
+.tabs{display:flex;gap:22px;border-bottom:1px solid var(--line);margin:22px 0 14px}
+.tabs button{border:0;background:none;padding:8px 0;cursor:pointer;color:var(--muted);font-weight:500;border-bottom:2px solid transparent}
+.tabs button.on{color:var(--hd);border-color:var(--brand)}
+.pad{padding:18px}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}.row>div{flex:1;min-width:140px}
+.pill{font-size:12px;padding:2px 9px;border-radius:10px;background:var(--soft);font-weight:500}
+.pill.b{color:var(--up)}.pill.s{color:var(--dn)}
+dialog{border:1px solid var(--line);border-radius:14px;padding:26px;width:min(380px,92vw);background:var(--panel);color:var(--ink)}
+dialog::backdrop{background:rgba(10,15,25,.55)}
+.hero{display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap;padding:24px;margin-bottom:8px;background:var(--soft);border-radius:14px}
+.hero h1{font-size:26px;max-width:20ch;line-height:1.25}.hero p{margin:8px 0 0;max-width:46ch;color:var(--muted)}
+.note,footer{font-size:12.5px;color:var(--muted)}footer{text-align:center;padding:20px}
+/* ---------- responsive ---------- */
+.two>*,.cards>*{min-width:0}
+.scroll{-webkit-overflow-scrolling:touch}
+.tabs{overflow-x:auto;white-space:nowrap;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
+@media(min-width:1280px){.bar,main{max-width:1240px}}
+@media(max-width:900px){.ord{position:static}.chart svg{height:200px}}
+@media(max-width:700px){
+ .bar{padding:10px 14px;gap:10px}
+ .logo{margin-right:auto}
+ #tg{order:2}#auth{order:3}
+ nav{order:4;width:100%}nav a{flex:1;text-align:center}
+ .sw{order:5;width:100%;max-width:none;margin:0;flex-basis:100%}
+ main{padding:16px 14px 40px}
+ .hero{padding:18px}.hero h1{font-size:21px}.hero .btn{width:100%}
+ .sec{font-size:16px;margin:20px 0 10px}
+ th,td{padding:10px 12px}
+ .big{font-size:26px}
+ .stats{grid-template-columns:1fr 1fr}
+ .strip div{padding:12px 14px}.strip b{font-size:17px}
+ .tape div{padding:8px 12px;grid-template-columns:56px 1fr auto auto;gap:6px}
+ .box-h,.pad,.ord{padding-left:14px;padding-right:14px}
+ .tabs{gap:18px}
+ .row>div{min-width:100%}.row .btn{flex:1}
+ .av{width:32px;height:32px}
+ input,select{font-size:16px}
+ .btn,.go2,.seg button{min-height:42px}.btn.sm{min-height:34px}
+}
+@media(max-width:640px){
+ #mk th:nth-child(4),#mk td:nth-child(4),#mk th:nth-child(5),#mk td:nth-child(5),
+ #t-hold th:nth-child(3),#t-hold td:nth-child(3),#t-hold th:nth-child(5),#t-hold td:nth-child(5){display:none}
+}
+@media(max-width:380px){.cards{grid-template-columns:1fr}.nm small{display:none}.logo{font-size:18px}}
+@media(hover:none){tbody tr.go:hover,#res a:hover,.card:hover{background:none;border-color:var(--line)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
 </head>
 <body>
-<header>
-  <div class="brand"><div class="logo">C</div><div><h1>ChronosMatch</h1><p>Limit order matching · Phase 3 dashboard</p></div></div>
-  <div class="status"><span class="dot" id="healthDot"></span><span id="healthText">Connecting to engine…</span></div>
-</header>
+<header><div class="bar">
+  <a href="#explore" class="logo"><b>C</b>Chronosmatch</a>
+  <nav><a href="#explore" id="n-explore">Explore</a><a href="#dashboard" id="n-dashboard">Dashboard</a></nav>
+  <div class="sw"><input id="q" placeholder="Search stocks, e.g. TCS" aria-label="Search stocks" autocomplete="off"><div id="res"></div></div>
+  <button class="btn sm" id="tg" aria-label="Switch theme">Dark</button>
+  <span id="engineStatus" class="note" role="status" style="white-space:nowrap">Engine: checking…</span><span id="auth"></span>
+</div></header>
+
 <main>
-  <div class="section-title"><div><h2>Market overview</h2><p>Live view of the local matching engine</p></div><div class="top-actions"><select id="symbolFilter" class="small-select" aria-label="Filter symbol"><option value="">All symbols</option></select><button class="secondary" id="refreshBtn">Refresh</button></div></div>
-  <section class="metrics">
-    <div class="metric"><div class="label">Accepted orders</div><div class="value" id="accepted">—</div><div class="sub">Lifetime in current journal</div></div>
-    <div class="metric"><div class="label">Active orders</div><div class="value" id="active">—</div><div class="sub">Resting in order books</div></div>
-    <div class="metric"><div class="label">Executed trades</div><div class="value" id="tradeCount">—</div><div class="sub">Matched executions</div></div>
-    <div class="metric"><div class="label">Quantity traded</div><div class="value" id="tradedQty">—</div><div class="sub">Total units executed</div></div>
-  </section>
-  <div class="layout">
-    <div>
-      <section class="panel">
-        <h3>Place limit order</h3><p class="hint">Crossing orders match by price-time priority. Execution uses the resting order’s price.</p>
-        <form id="orderForm">
-          <div class="form-grid">
-            <div class="field"><label for="symbol">Symbol</label><input id="symbol" name="symbol" placeholder="e.g. AAPL" maxlength="10" required pattern="[A-Za-z0-9]{1,10}"></div>
-            <div class="field"><label for="side">Side</label><select id="side" name="side"><option value="BUY">BUY</option><option value="SELL">SELL</option></select></div>
-            <div class="field"><label for="price">Limit price</label><input id="price" name="price" placeholder="100.2500" inputmode="decimal" required pattern="[0-9]+([.][0-9]{1,4})?"></div>
-            <div class="field"><label for="quantity">Quantity</label><input id="quantity" name="quantity" type="number" min="1" max="1000000000" step="1" placeholder="10" required></div>
-            <div class="field full"><label for="orderId">Order ID (optional)</label><input id="orderId" name="orderId" placeholder="Auto-generated if blank" maxlength="64"></div>
-          </div>
-          <button class="primary" id="submitBtn" type="submit">Submit order</button><div id="orderMessage" class="message" role="status"></div>
-        </form>
-      </section>
-      <section class="panel"><h3>Current order book</h3><p class="hint">Aggregated depth for the selected symbol.</p>
-        <div class="field"><label for="bookSymbol">Book symbol</label><input id="bookSymbol" value="AAPL" maxlength="10" placeholder="AAPL"></div>
-        <div class="book-grid"><div><div class="side-title bid">BIDS · BUY</div><div id="bids" class="table-wrap"></div></div><div><div class="side-title ask">ASKS · SELL</div><div id="asks" class="table-wrap"></div></div></div>
-      </section>
+<section id="v-explore">
+  <section id="v-explore">
+  <div class="hero">
+      <h1>Explore the market. Make every move with clarity.</h1>
+
+      <p>
+        Discover stocks, follow market-style activity, explore a
+        copy-trading demo, and keep your portfolio in one simple
+        dashboard. ChronosMatch connects to its matching-engine API
+        when the backend is available.
+      </p>
     </div>
-    <div>
-      <section class="panel"><div class="section-title"><div><h3>Open orders</h3><p>Active orders awaiting execution or cancellation</p></div><span id="openCount" class="pill NEW">0 orders</span></div>
-        <div id="ordersTable" class="table-wrap"></div>
-      </section>
-      <section class="panel"><div class="section-title"><div><h3>Recent trades</h3><p>Latest executions from the engine</p></div><span class="pill FILLED">Execution tape</span></div>
-        <div id="tradesTable" class="table-wrap"></div>
-      </section>
-    </div>
+
+    <button class="btn pri" id="cta">Get started</button>
   </div>
-  <p class="footer">ChronosMatch is an educational simulator, not a production exchange. Data persists locally in SQLite.</p>
+</section>
+  <div class="sec">Indices</div><div class="cards i" id="idx"></div>
+  <div class="sec">Most traded today</div><div class="cards" id="top"></div>
+  <div class="two" style="margin-top:26px">
+    <div><div class="sec" style="margin-top:0">All stocks · company-wise trades</div>
+      <div class="box scroll"><table id="mk"><thead><tr><th>Company</th><th class="num">Price</th><th class="num">1D change</th><th class="num">Volume</th><th class="num">Trades</th><th>Buy / sell</th></tr></thead><tbody></tbody></table></div></div>
+    <div><div class="sec" style="margin-top:0">Live trades</div><div class="box"><div class="box-h live" style="padding-bottom:8px">All companies</div><div class="tape" id="tape"></div></div></div>
+  </div>
+  <p class="note">Market quotes and portfolio/wallet data are demo simulations. Orders are submitted to the ChronosMatch matching-engine API when it is available.</p>
+</section>
+
+<section id="v-stock" hidden></section>
+
+<section id="v-dashboard" hidden>
+  <h1 id="hi" style="font-size:24px"></h1>
+  <div class="box strip" id="strip" style="margin-top:16px"></div>
+  <div class="tabs" id="tabs"><button data-t="hold" class="on">Holdings</button><button data-t="ord">Orders</button><button data-t="pay">Payments</button><button data-t="copy">Copy trading</button></div>
+  <div id="t-hold" class="box scroll"></div>
+  <div id="t-ord" class="box scroll" hidden></div><p id="apiNote" class="note" style="margin-top:8px">Connecting to matching engine…</p>
+  <div id="t-pay" hidden>
+    <div class="box pad f" style="margin-bottom:14px"><form id="payf" class="row">
+      <div><label for="amt">Amount (₹)</label><input id="amt" type="number" min="100" step="100" placeholder="5000"></div>
+      <div><label for="mth">Method</label><select id="mth"><option>UPI</option><option>Net banking</option><option>Bank transfer (NEFT)</option></select></div>
+      <button class="btn pri" data-a="add">Add funds</button><button class="btn" data-a="out">Withdraw</button></form><div class="msg" id="pmsg"></div></div>
+    <div class="box scroll" id="paytbl"></div>
+  </div>
+  <div id="t-copy" class="box scroll" hidden></div>
+</section>
 </main>
+<footer>© 2026 Chronosmatch. Investments in securities are subject to market risk. Demo interface.</footer>
+
+<dialog id="dlg"><form id="lf" method="dialog" class="f">
+  <h2>Log in</h2>
+  <label for="em">Email</label><input id="em" type="email" required value="aarav@example.com" autocomplete="username">
+  <label for="pw">Password</label><input id="pw" type="password" required minlength="4" value="demo1234" autocomplete="current-password">
+  <p class="note">Demo: any email and a password of 4+ characters works.</p>
+  <div class="row" style="margin-top:12px"><button class="btn pri" style="flex:1">Log in</button><button class="btn" type="button" id="cx">Cancel</button></div>
+</form></dialog>
+
 <script>
-const $ = (id) => document.getElementById(id);
-const num = (v) => Number(v || 0).toLocaleString();
-const safe = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-async function api(url, options={}) {
-  const res = await fetch(url, {headers:{'Content-Type':'application/json', ...(options.headers||{})}, ...options});
-  let data={}; try { data=await res.json(); } catch {}
-  if(!res.ok) throw new Error(data.detail || `Request failed (${res.status})`);
+var $=function(s){return document.querySelector(s)};
+var fmt=function(n){return n.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})};
+var inr=function(n){return '₹'+fmt(n)};
+var cls=function(n){return n>=0?'up':'dn'};
+var sg=function(n){return (n>=0?'+':'')+fmt(n)};
+var arr=function(n){return n>=0?'▲':'▼'};
+
+/* ---------- data ---------- */
+var stocks=[['RELIANCE','Reliance Industries',1190],['TCS','Tata Consultancy Services',2530.00],['HDFCBANK','HDFC Bank',692.80],['INFY','Infosys',1153.80],['ICICIBANK','ICICI Bank',1394.20],['SBIN','State Bank of India',958.60],['ITC','ITC Ltd',257.90],['LT','Larsen & Toubro',3647],['BHARTIARTL','Bharti Airtel',1892.10],['TATAMOTORS','Tata Motors',396],['WIPRO','Wipro',189.84],['ADANIENT','Adani Enterprises',2477],['AXISBANK', 'Axis Bank', 1217],
+['KOTAKBANK', 'Kotak Mahindra Bank', 430.50],
+['BAJFINANCE', 'Bajaj Finance', 980],
+['BAJAJFINSV', 'Bajaj Finserv', 1950],
+['MARUTI', 'Maruti Suzuki India', 12800],
+['SUNPHARMA', 'Sun Pharmaceutical', 1750],
+['TITAN', 'Titan Company', 3450],
+['ULTRACEMCO', 'UltraTech Cement', 11200],
+['ASIANPAINT', 'Asian Paints', 2450],
+['NTPC', 'NTPC', 350],
+['POWERGRID', 'Power Grid Corporation', 310],
+['ONGC', 'Oil and Natural Gas Corporation', 260],
+['COALINDIA', 'Coal India', 420],
+['JSWSTEEL', 'JSW Steel', 1150],
+['TATASTEEL', 'Tata Steel', 175],
+['HINDALCO', 'Hindalco Industries', 720],
+['GRASIM', 'Grasim Industries', 2800],
+['TECHM', 'Tech Mahindra', 1650],
+['HCLTECH', 'HCL Technologies', 1680],
+['INDUSINDBK', 'IndusInd Bank', 850],
+['DRREDDY', "Dr. Reddy's Laboratories", 1250],
+['CIPLA', 'Cipla', 1600],
+['APOLLOHOSP', 'Apollo Hospitals', 7200],
+['DIVISLAB', "Divi's Laboratories", 6200],
+['NESTLEIND', 'Nestle India', 1250],
+['BRITANNIA', 'Britannia Industries', 5800],
+['TATACONSUM', 'Tata Consumer Products', 1150],
+['EICHERMOT', 'Eicher Motors', 6200],
+['HEROMOTOCO', 'Hero MotoCorp', 5800],
+['BAJAJ-AUTO', 'Bajaj Auto', 10500],
+['M&M', 'Mahindra & Mahindra', 3200],
+['TRENT', 'Trent', 6500],
+['BEL', 'Bharat Electronics', 420],
+['HAL', 'Hindustan Aeronautics', 4500],
+['DLF', 'DLF', 850],
+['PIDILITIND', 'Pidilite Industries', 1450],
+['SBILIFE', 'SBI Life Insurance', 1850],
+['HDFCLIFE', 'HDFC Life Insurance', 750],
+['ICICIPRULI', 'ICICI Prudential Life Insurance', 750],
+['SHRIRAMFIN', 'Shriram Finance', 950],
+['BPCL', 'Bharat Petroleum', 340],
+['IOC', 'Indian Oil Corporation', 160],
+['VEDL', 'Vedanta', 520],
+['ADANIPORTS', 'Adani Ports', 1450],
+['ZOMATO', 'Eternal (formerly Zomato)', 300],
+['DMART', 'Avenue Supermarts (DMart)', 4200],
+['PAYTM', 'One 97 Communications (Paytm)', 1200],
+['IRCTC', 'Indian Railway Catering and Tourism Corporation', 750],
+['POLICYBZR', 'PB Fintech', 1800],
+['NYKAA', 'FSN E-Commerce Ventures (Nykaa)', 220],['BANKBARODA', 'Bank of Baroda', 260],
+['PNB', 'Punjab National Bank', 115],
+['CANBK', 'Canara Bank', 125],
+['UNIONBANK', 'Union Bank of India', 155],
+['IDFCFIRSTB', 'IDFC First Bank', 75],
+['FEDERALBNK', 'Federal Bank', 210],
+['BANDHANBNK', 'Bandhan Bank', 180],
+['AUBANK', 'AU Small Finance Bank', 700],
+['YESBANK', 'Yes Bank', 20],
+['RBLBANK', 'RBL Bank', 190],
+
+['DABUR', 'Dabur India', 550],
+['GODREJCP', 'Godrej Consumer Products', 1300],
+['MARICO', 'Marico', 750],
+['COLPAL', 'Colgate-Palmolive India', 3000],
+['EMAMILTD', 'Emami', 750],
+['VBL', 'Varun Beverages', 500],
+['UNITDSPR', 'United Spirits', 1450],
+['UBL', 'United Breweries', 2000],
+['TATAPOWER', 'Tata Power', 400],
+['ADANIGREEN', 'Adani Green Energy', 1000],
+
+['PFC', 'Power Finance Corporation', 450],
+['RECLTD', 'REC Limited', 400],
+['IRFC', 'Indian Railway Finance Corporation', 140],
+['NHPC', 'NHPC Limited', 90],
+['SJVN', 'SJVN Limited', 100],
+['GAIL', 'GAIL India', 190],
+['PETRONET', 'Petronet LNG', 300],
+['IGL', 'Indraprastha Gas', 200],
+['MGL', 'Mahanagar Gas', 1400],
+['ATGL', 'Adani Total Gas', 650],
+
+['INDHOTEL', 'Indian Hotels Company', 750],
+['OBEROIRLTY', 'Oberoi Realty', 1800],
+['GODREJPROP', 'Godrej Properties', 2200],
+['PRESTIGE', 'Prestige Estates Projects', 1800],
+['LODHA', 'Macrotech Developers', 1400],
+['PHOENIXLTD', 'Phoenix Mills', 1700],
+['CONCOR', 'Container Corporation of India', 750],
+['DELHIVERY', 'Delhivery', 450],
+['BLUEDART', 'Blue Dart Express', 6500],
+['EXIDEIND', 'Exide Industries', 400],
+
+['BOSCHLTD', 'Bosch Limited', 35000],
+['MRF', 'MRF Limited', 140000],
+['APOLLOTYRE', 'Apollo Tyres', 500],
+['BALKRISIND', 'Balkrishna Industries', 2500],
+['TVSMOTOR', 'TVS Motor Company', 3000],
+['ASHOKLEY', 'Ashok Leyland', 150],
+['ESCORTS', 'Escorts Kubota', 3500],
+['TIINDIA', 'Tube Investments of India', 3000],
+['CUMMINSIND', 'Cummins India', 4000],
+['POLYCAB', 'Polycab India', 6500],
+
+['KEI', 'KEI Industries', 4000],
+['HAVELLS', 'Havells India', 1600],
+['VOLTAS', 'Voltas', 1400],
+['CROMPTON', 'Crompton Greaves Consumer Electricals', 350],
+['DIXON', 'Dixon Technologies', 15000],
+['KAYNES', 'Kaynes Technology India', 6000],
+['PERSISTENT', 'Persistent Systems', 6000],
+['COFORGE', 'Coforge', 7000],
+['MPHASIS', 'Mphasis', 3000],
+['LTIM', 'LTIMindtree', 6000]]
+.map(function(a){var p=a[2],h=[p];for(var i=0;i<59;i++){p*=1+(Math.random()-.5)*.004;h.unshift(p)}
+ return {sym:a[0],name:a[1],price:a[2],open:h[0],hi:Math.max.apply(0,h),lo:Math.min.apply(0,h),hist:h,chg:(a[2]/h[0]-1)*100,vol:Math.floor(Math.random()*900000+200000),n:0,b:1,s:1,f:0}});
+var by={};stocks.forEach(function(s){by[s.sym]=s});
+var indices=[{n:'NIFTY 50',v:24850,o:24850},{n:'SENSEX',v:81420,o:81420},{n:'BANK NIFTY',v:53210,o:53210}];
+var trades=[],total=0,cur=null,side='BUY',user=null,oid=1000;
+var engine={online:false,stats:null,orders:[],trades:[],symbols:[],health:null};
+var API_BASE=(document.querySelector('meta[name="chronosmatch-api"]')||{}).content||'';
+function apiUrl(path){return API_BASE.replace(/\/$/,'')+path}
+async function fetchLivePrice(symbol) {
+    try {
+        const response = await fetch(
+            `/market/price/${encodeURIComponent(symbol)}`
+        );
+
+        if (!response.ok) {
+            throw new Error(`Price API returned ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (typeof data.price !== "number" || !Number.isFinite(data.price)) {
+            throw new Error("Invalid price returned by API");
+        }
+
+        const stock = by[symbol];
+        if (!stock) return;
+
+        stock.price = data.price;
+        stock.f = 0;
+
+        if (cur === symbol) updStock();
+        renderExplore();
+
+        console.log(`${symbol} latest price: ₹${data.price}`);
+    } catch (error) {
+        console.error("Live price error:", error);
+    }
+}
+async function engineApi(path,options){
+  var res=await fetch(apiUrl(path),Object.assign({headers:{'Content-Type':'application/json'}},options||{}));
+  var data={};try{data=await res.json()}catch(e){}
+  if(!res.ok)throw new Error(data.detail||data.message||('API request failed ('+res.status+')'));
   return data;
 }
-function table(headers, rows, empty) {
-  if(!rows.length) return `<div class="empty">${safe(empty)}</div>`;
-  return `<table><thead><tr>${headers.map(h=>`<th>${safe(h)}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>`;
-}
-function pill(value){return `<span class="pill ${safe(value)}">${safe(value)}</span>`}
-function showMessage(text, ok=false) {const el=$('orderMessage');el.textContent=text;el.className='message '+(ok?'ok':'err')}
-async function refresh() {
-  try {
-    const [stats, orders, trades, symbols, health] = await Promise.all([
-      api('/stats'), api('/orders?active_only=true'), api('/trades?limit=30'), api('/symbols'), api('/health')
-    ]);
-    $('healthDot').style.background='#35d49a'; $('healthText').textContent=health.persistence==='sqlite'?'Engine online · SQLite persistence':'Engine online · in-memory mode';
-    $('accepted').textContent=num(stats.orders_accepted); $('active').textContent=num(stats.active_orders);
-    $('tradeCount').textContent=num(stats.trades); $('tradedQty').textContent=num(stats.traded_quantity);
-    const filter=$('symbolFilter'), prior=filter.value;
-    filter.innerHTML='<option value="">All symbols</option>'+symbols.symbols.map(s=>`<option value="${safe(s)}">${safe(s)}</option>`).join('');
-    if(symbols.symbols.includes(prior)) filter.value=prior;
-    const chosen=filter.value;
-    const filtered=chosen?orders.orders.filter(o=>o.symbol===chosen):orders.orders;
-    $('openCount').textContent=`${filtered.length} orders`;
-    $('ordersTable').innerHTML=table(['ID','Symbol','Side','Price','Remaining','Status','Action'], filtered.map(o=>`<tr><td class="mono">${safe(o.order_id)}</td><td>${safe(o.symbol)}</td><td>${pill(o.side)}</td><td class="mono">${safe(o.price)}</td><td>${num(o.remaining)}</td><td>${pill(o.status)}</td><td><button class="cancel" data-cancel="${safe(o.order_id)}">Cancel</button></td></tr>`), 'No open orders');
-    const visibleTrades=chosen?trades.trades.filter(t=>t.symbol===chosen):trades.trades;
-    $('tradesTable').innerHTML=table(['Trade','Symbol','Price','Qty','Buy order','Sell order'], visibleTrades.map(t=>`<tr><td class="mono">${safe(t.trade_id)}</td><td>${safe(t.symbol)}</td><td class="mono">${safe(t.price)}</td><td>${num(t.quantity)}</td><td class="mono">${safe(t.buy_order_id)}</td><td class="mono">${safe(t.sell_order_id)}</td></tr>`), 'No trades yet');
-    await refreshBook();
-  } catch(e) {
-    $('healthDot').style.background='#ff6b7d'; $('healthText').textContent='API connection failed';
-    console.error(e);
+async function syncEngine(){
+  try{
+    var r=await Promise.all([engineApi('/health'),engineApi('/stats'),engineApi('/orders?active_only=false'),engineApi('/trades?limit=30'),engineApi('/symbols')]);
+    engine.health=r[0];engine.stats=r[1];engine.orders=r[2].orders||[];engine.trades=r[3].trades||[];engine.symbols=r[4].symbols||[];engine.online=true;
+    $('#engineStatus').textContent='Engine: online';$('#engineStatus').className='note up';
+    $('#apiNote').textContent='Connected to ChronosMatch API. Backend orders are shown in the Orders tab.';
+    if(!$('#v-dashboard').hidden&&user)renderDash(true);
+  }catch(e){
+    engine.online=false;$('#engineStatus').textContent='Engine: offline';$('#engineStatus').className='note dn';
+    $('#apiNote').textContent='Matching-engine API unavailable. Check backend URL and CORS. Wallet, holdings and quotes remain simulated.';
   }
 }
-async function refreshBook() {
-  const sym=$('bookSymbol').value.trim().toUpperCase();
-  if(!sym){$('bids').innerHTML='<div class="empty">Enter a symbol</div>';$('asks').innerHTML='<div class="empty">Enter a symbol</div>';return}
-  try {
-    const book=await api('/order-book/'+encodeURIComponent(sym));
-    const render=levels=>table(['Price','Quantity','Orders'],levels.map(l=>`<tr><td class="mono">${safe(l.price)}</td><td>${num(l.quantity)}</td><td>${num(l.orders)}</td></tr>`),'No levels');
-    $('bids').innerHTML=render(book.bids); $('asks').innerHTML=render(book.asks);
-  } catch(e) { $('bids').innerHTML=`<div class="empty">${safe(e.message)}</div>`; $('asks').innerHTML='<div class="empty">—</div>'; }
+
+var who=['Aarav','Meera','Rohit','Sana','Vikram','Ishita','Kabir','Neha'];
+var acct={wallet:124500,hold:{TCS:[12,3610],INFY:[40,1420],HDFCBANK:[25,1590],ITC:[150,402],TATAMOTORS:[30,1011]},orders:[],
+ pays:[['21 Oct 2026','Added via UPI',25000,'Done','CM2310481'],['14 Oct 2026','Withdrawal to HDFC ••4412',-15000,'Done','CM2309977'],['02 Oct 2026','Added via Net banking',50000,'Done','CM2307120'],['28 Sep 2026','Withdrawal to HDFC ••4412',-8000,'Pending','CM2306554']],
+ traders:[{n:'Meera Iyer',r:'+24.6%',f:'18,420',k:'Medium',on:true},{n:'Rohit Sharma',r:'+31.9%',f:'9,870',k:'High',on:false},{n:'Sana Qureshi',r:'+12.3%',f:'26,015',k:'Low',on:false}]};
+
+function av(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%360;return '<span class="av" style="background:hsl('+h+',45%,45%)">'+s.slice(0,2)+'</span>'}
+
+/* ---------- market simulation ---------- */
+function tick(){
+  stocks.forEach(function(s){
+    if(Math.random()<.6){var p=Math.round(s.price*(1+(Math.random()-.5)*.004)*20)/20;s.f=p>s.price?1:-1;s.price=p;s.chg=(p/s.open-1)*100;
+      s.hi=Math.max(s.hi,p);s.lo=Math.min(s.lo,p)}
+    s.hist.push(s.price);if(s.hist.length>120)s.hist.shift();
+  });
+  indices.forEach(function(x){x.v*=1+(Math.random()-.5)*.0012});
+  fillOpen();renderExplore();if(cur)updStock();if(user&&!$('#v-dashboard').hidden)renderDash(true);
 }
-$('orderForm').addEventListener('submit', async e=>{
-  e.preventDefault(); $('submitBtn').disabled=true;
-  const body={symbol:$('symbol').value.trim().toUpperCase(),side:$('side').value,price:$('price').value.trim(),quantity:Number($('quantity').value)};
-  if($('orderId').value.trim()) body.order_id=$('orderId').value.trim();
-  try {
-    const result=await api('/orders',{method:'POST',body:JSON.stringify(body)});
-    const order=result.order, n=result.trades.length;
-    showMessage(`Order ${order.order_id} accepted · ${order.status} · ${n} trade(s) executed`,true);
-    $('bookSymbol').value=order.symbol; $('symbolFilter').value=order.symbol;
-    $('orderId').value=''; $('quantity').value=''; await refresh();
-  } catch(err) { showMessage(err.message,false); }
-  finally { $('submitBtn').disabled=false; }
+function newTrade(){
+  var s=stocks[Math.floor(Math.random()*stocks.length)],sd=Math.random()<.5?'BUY':'SELL',q=Math.ceil(Math.random()*40)*5;
+  s.n++;s.vol+=q;sd==='BUY'?s.b+=q:s.s+=q;total++;
+  trades.unshift({sym:s.sym,side:sd,q:q,p:s.price,t:new Date().toLocaleTimeString('en-IN',{hour12:false}),who:who[Math.floor(Math.random()*who.length)]});
+  if(trades.length>1000)trades.pop();
+  renderTape('#tape',null);if(cur)renderTape('#sfeed',cur);
+}
+function renderTape(id,sym){
+  var e=$(id);if(!e)return;
+  var l=trades.filter(function(t){return !sym||t.sym===sym}).slice(0,100);
+  e.innerHTML=l.map(function(t){return '<div><span class="t">'+t.t+'</span><span><b>'+t.sym+'</b> <span class="co">'+t.who+'</span></span><span class="'+(t.side==='BUY'?'up':'dn')+'">'+t.side+' '+t.q+'</span><span class="num">'+fmt(t.p)+'</span></div>'}).join('')||'<div><span class="co" style="grid-column:1/-1">Waiting for the next trade…</span></div>';
+}
+
+/* ---------- explore ---------- */
+function renderExplore(){
+  $('#idx').innerHTML=indices.map(function(x){var c=(x.v/x.o-1)*100;return '<div class="box idx"><b>'+x.n+'</b><span class="num"><b>'+fmt(x.v)+'</b><br><span class="'+cls(c)+'">'+sg(x.v-x.o)+' ('+sg(c)+'%)</span></span></div>'}).join('');
+  $('#top').innerHTML=stocks.slice().sort(function(a,b){return b.vol-a.vol}).slice(0,4).map(function(s){
+    return '<a class="box card" href="#stock/'+s.sym+'">'+av(s.sym)+'<b>'+s.name+'</b><div class="p">'+inr(s.price)+'</div><span class="'+cls(s.chg)+'">'+sg(s.chg)+'%</span></a>'}).join('');
+  $('#mk tbody').innerHTML=stocks.map(function(s){
+    var f=s.f>0?'fu':s.f<0?'fd':'';s.f=0;var pc=Math.round(s.b/(s.b+s.s)*100);
+    return '<tr class="go" data-s="'+s.sym+'"><td><div class="nm">'+av(s.sym)+'<span><b>'+s.name+'</b><small>'+s.sym+'</small></span></div></td><td class="num '+f+'">'+fmt(s.price)+'</td><td class="num '+cls(s.chg)+'">'+arr(s.chg)+' '+sg(s.chg)+'%</td><td class="num">'+s.vol.toLocaleString('en-IN')+'</td><td class="num">'+s.n+'</td><td><div class="split" title="'+pc+'% buy"><i style="width:'+pc+'%"></i></div></td></tr>'}).join('');
+}
+
+/* ---------- stock page + order ticket ---------- */
+function showStock(sym){
+  cur=sym;var s=by[sym];side='BUY';
+  $('#v-stock').innerHTML='<a href="#explore" class="co">← Explore</a><div class="two" style="margin-top:12px"><div>'+
+   '<div class="nm" style="gap:14px">'+av(s.sym)+'<span><h2>'+s.name+'</h2><small class="co">NSE · '+s.sym+'</small></span></div>'+
+   '<div class="big num" style="text-align:left" id="sp"></div><div id="sc"></div>'+
+   '<div class="box" style="margin-top:14px"><div class="chart" id="ch"></div><div class="stats" id="st"></div></div>'+
+   '<div class="sec">Trades in '+s.name+'</div><div class="box"><div class="box-h live" style="padding-bottom:8px">Live</div><div class="tape" id="sfeed"></div></div></div>'+
+   '<div class="box ord"><div class="seg"><button data-side="BUY" class="on">Buy</button><button data-side="SELL">Sell</button></div>'+
+   '<label for="oq">Quantity</label><input id="oq" type="number" min="1" value="1">'+
+   '<label for="ot">Order type</label><select id="ot"><option>Market</option><option>Limit</option></select>'+
+   '<div id="olw" hidden><label for="ol">Limit price (₹)</label><input id="ol" type="number" step="0.05"></div>'+
+   '<div class="rq"><span id="rl"></span><b id="req"></b></div><div class="note" id="av" style="margin-top:6px"></div>'+
+   '<button class="go2" id="go">Buy</button><div class="msg" id="omsg"></div></div></div>';
+  $('#ol').value=s.price.toFixed(2);updStock();renderTape('#sfeed',sym);
+}
+function ticket(){
+  var s=by[cur],q=parseInt($('#oq').value)||0,lim=$('#ot').value==='Limit',p=lim?(parseFloat($('#ol').value)||0):s.price,h=acct.hold[cur];
+  $('#rl').textContent=side==='BUY'?'Approx. required':'Approx. credit';$('#req').textContent=inr(q*p);
+  $('#av').textContent=!user?'Log in to place orders.':side==='BUY'?'Wallet balance: '+inr(acct.wallet):'You hold '+(h?h[0]:0)+' shares of '+s.sym;
+  $('#go').textContent=side==='BUY'?'Buy '+s.sym:'Sell '+s.sym;$('#go').className='go2'+(side==='SELL'?' s':'');
+  document.querySelectorAll('.seg button').forEach(function(b){b.className=b.dataset.side===side?'on':''});
+  $('#olw').hidden=!lim;
+}
+function updStock(){
+  var s=by[cur];if(!s||!$('#sp'))return;
+  $('#sp').textContent=inr(s.price);$('#sc').innerHTML='<span class="'+cls(s.chg)+'">'+arr(s.chg)+' '+sg(s.price-s.open)+' ('+sg(s.chg)+'%) today</span>';
+  $('#ch').innerHTML=chart(s);
+  $('#st').innerHTML=[['Open',fmt(s.open)],['Day high',fmt(s.hi)],['Day low',fmt(s.lo)],['Volume',s.vol.toLocaleString('en-IN')],['Trades',s.n],['Buy / sell qty',s.b+' / '+s.s]].map(function(x){return '<div><span>'+x[0]+'</span><b>'+x[1]+'</b></div>'}).join('');
+  ticket();
+}
+function chart(s){
+  var h=s.hist,mn=Math.min.apply(0,h),mx=Math.max.apply(0,h),d=h.map(function(v,i){return (i?'L':'M')+(i/(h.length-1)*600).toFixed(1)+' '+(190-(v-mn)/(mx-mn||1)*170).toFixed(1)}).join('');
+  var c=s.chg>=0?'var(--up)':'var(--dn)';
+  return '<svg viewBox="0 0 600 200" preserveAspectRatio="none"><path d="'+d+'L600 200L0 200Z" fill="'+c+'" opacity=".09"/><path d="'+d+'" fill="none" stroke="'+c+'" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>';
+}
+function canFill(o){
+  var h=acct.hold[o.sym],px=by[o.sym].price;
+  if(o.side==='BUY')return acct.wallet>=o.q*px?'':'Not enough balance. Add funds first.';
+  return h&&h[0]>=o.q?'':'You don’t hold enough shares to sell.';
+}
+function fill(o){
+  var px=by[o.sym].price,h=acct.hold[o.sym];o.price=px;o.status='Executed';
+  if(o.side==='BUY'){acct.wallet-=o.q*px;acct.hold[o.sym]=h?[h[0]+o.q,(h[0]*h[1]+o.q*px)/(h[0]+o.q)]:[o.q,px]}
+  else{acct.wallet+=o.q*px;h[0]-=o.q;if(!h[0])delete acct.hold[o.sym]}
+}
+function fillOpen(){
+  acct.orders.forEach(function(o){
+    if(o.status!=='Open')return;var px=by[o.sym].price;
+    if((o.side==='BUY'&&px<=o.limit)||(o.side==='SELL'&&px>=o.limit)){if(canFill(o))o.status='Rejected';else fill(o)}
+  });
+}
+async function place(){
+  var m=$('#omsg');m.className='msg dn';m.textContent='';
+  if(!user){$('#dlg').showModal();return}
+  var q=parseInt($('#oq').value,10),lim=$('#ot').value==='Limit',lp=parseFloat($('#ol').value);
+  if(!q||q<1||!Number.isSafeInteger(q)){m.textContent='Enter a valid whole quantity of 1 or more.';return}
+  if(lim&&(!Number.isFinite(lp)||lp<=0)){m.textContent='Enter a valid positive limit price.';return}
+  if(!engine.online){m.textContent='ChronosMatch API is offline. Start the backend and try again; no order was submitted.';await syncEngine();return}
+  // Matching engine supports limit orders; Market is represented by a limit at the displayed quote.
+  var price=lim?lp:by[cur].price;
+  var body={symbol:cur,side:side,price:String(price),quantity:q,order_id:'WEB-'+Date.now()+'-'+Math.floor(Math.random()*100000)};
+  try{
+    var result=await engineApi('/orders',{method:'POST',body:JSON.stringify(body)});
+    var o=result.order||{},n=(result.trades||[]).length;
+    acct.orders.unshift({id:o.order_id||body.order_id,time:new Date().toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:false}),sym:cur,side:side,q:q,type:lim?'Limit':'Market (limit at quote)',price:Number(o.price||price),limit:price,status:o.status||'Accepted'});
+    m.className='msg up';m.textContent='Backend accepted order '+(o.order_id||body.order_id)+' · '+(o.status||'accepted')+' · '+n+' trade(s) executed. Market orders are sent as limits at the displayed quote.';
+    await syncEngine();ticket();
+  }catch(err){m.className='msg dn';m.textContent='Order was not confirmed by the matching engine: '+err.message}
+}
+
+/* ---------- dashboard ---------- */
+function holds(){return Object.keys(acct.hold).map(function(k){var h=acct.hold[k],s=by[k];return {sym:k,name:s.name,q:h[0],avg:h[1],ltp:s.price,val:s.price*h[0],inv:h[1]*h[0]}})}
+function renderDash(live){
+  var H=holds(),inv=0,val=0;H.forEach(function(h){inv+=h.inv;val+=h.val});
+  $('#strip').innerHTML='<div><span>Current value</span><b>'+inr(val)+'</b></div><div><span>Invested</span><b>'+inr(inv)+'</b></div><div><span>Total returns</span><b class="'+cls(val-inv)+'">'+sg(val-inv)+'</b></div><div><span>Wallet balance</span><b>'+inr(acct.wallet)+'</b></div>';
+  $('#t-hold').innerHTML=H.length?'<table><thead><tr><th>Company</th><th class="num">Qty</th><th class="num">Avg cost</th><th class="num">Price</th><th class="num">Value</th><th class="num">Returns</th><th></th></tr></thead><tbody>'+H.map(function(h){var p=h.val-h.inv;
+    return '<tr><td><div class="nm">'+av(h.sym)+'<span><b>'+h.name+'</b><small>'+h.sym+'</small></span></div></td><td class="num">'+h.q+'</td><td class="num">'+fmt(h.avg)+'</td><td class="num">'+fmt(h.ltp)+'</td><td class="num">'+fmt(h.val)+'</td><td class="num '+cls(p)+'">'+sg(p)+'<br>'+sg(p/h.inv*100)+'%</td><td class="num"><a class="btn sm pri" href="#stock/'+h.sym+'">Trade</a></td></tr>'}).join('')+'</tbody></table>':'<div class="pad">You don’t hold any stocks yet. Open a company from Explore to place your first order.</div>';
+  var backendOrders=engine.online?engine.orders.slice().reverse():[];
+  var allOrders=backendOrders.length?backendOrders.map(function(o){return {time:o.created_at||o.timestamp||'Backend',sym:o.symbol||'—',side:o.side||'—',q:o.quantity||o.remaining||0,price:Number(o.price||0),type:'ChronosMatch API',status:o.status||'Accepted'}}):acct.orders;
+  $('#t-ord').innerHTML=allOrders.length?'<table><thead><tr><th>Time</th><th>Company</th><th>Side</th><th class="num">Qty</th><th class="num">Price</th><th>Type</th><th>Status</th></tr></thead><tbody>'+allOrders.map(function(o){return '<tr><td>'+String(o.time)+'</td><td><b>'+o.sym+'</b></td><td><span class="pill '+(o.side==='BUY'?'b':'s')+'">'+o.side+'</span></td><td class="num">'+o.q+'</td><td class="num">'+fmt(Number(o.price)||0)+'</td><td>'+o.type+'</td><td><span class="pill">'+o.status+'</span></td></tr>'}).join('')+'</tbody></table>':'<div class="pad">No orders yet. Buy or sell from any stock page.</div>';
+  if(live)return;
+  $('#paytbl').innerHTML='<table><thead><tr><th>Date</th><th>Details</th><th>Ref</th><th class="num">Amount</th><th>Status</th></tr></thead><tbody>'+acct.pays.map(function(p){return '<tr><td>'+p[0]+'</td><td>'+p[1]+'</td><td class="co">'+p[4]+'</td><td class="num '+cls(p[2])+'">'+sg(p[2])+'</td><td><span class="pill">'+p[3]+'</span></td></tr>'}).join('')+'</tbody></table>';
+  $('#t-copy').innerHTML='<table><thead><tr><th>Trader</th><th class="num">1-yr return</th><th class="num">Followers</th><th>Risk</th><th>Copy fee</th><th></th></tr></thead><tbody>'+acct.traders.map(function(t,i){return '<tr><td><b>'+t.n+'</b></td><td class="num up">'+t.r+'</td><td class="num">'+t.f+'</td><td>'+t.k+'</td><td>₹0</td><td class="num"><button class="btn sm'+(t.on?'':' pri')+'" data-i="'+i+'">'+(t.on?'Stop copying':'Copy')+'</button></td></tr>'}).join('')+'</tbody></table>';
+}
+
+/* ---------- shell: auth, theme, routing ---------- */
+function mkUser(e){return {email:e,name:e.split('@')[0].replace(/^./,function(c){return c.toUpperCase()})}}
+function renderAuth(){
+  $('#auth').innerHTML=user?'<button class="btn sm" id="out">Log out ('+user.name+')</button>':'<button class="btn pri sm" id="in">Log in</button>';
+  $('#cta').hidden=!!user;
+}
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme',t);$('#tg').textContent=t==='dark'?'Light mode':'Dark mode';
+  try{localStorage.setItem('cm_theme',t)}catch(e){}
+}
+function route(){
+  var h=(location.hash||'#explore').slice(1).split('/'),v=h[0];
+  if(v==='stock'&&!by[h[1]])v='explore';
+  if(v==='dashboard'&&!user){v='explore';$('#dlg').showModal()}
+  ['explore','stock','dashboard'].forEach(function(k){$('#v-'+k).hidden=k!==v});
+  $('#n-explore').className=v==='dashboard'?'':'on';$('#n-dashboard').className=v==='dashboard'?'on':'';
+  cur=null;
+  if(v==='stock')showStock(h[1]);
+  if(v==='dashboard'){$('#hi').textContent='Hello, '+user.name;renderDash()}
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange',route);
+
+$('#tg').onclick=function(){setTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark')};
+$('#mk').onclick=function(e){var r=e.target.closest('tr[data-s]');if(r)location.hash='#stock/'+r.dataset.s};
+$('#q').oninput=function(e){
+  var t=e.target.value.toLowerCase().trim(),r=$('#res');
+  var l=t?stocks.filter(function(s){return (s.sym+s.name).toLowerCase().indexOf(t)>-1}).slice(0,6):[];
+  r.style.display=t?'block':'none';
+  r.innerHTML=l.length?l.map(function(s){return '<a href="#stock/'+s.sym+'">'+av(s.sym)+'<span class="nm"><span><b>'+s.name+'</b><small>'+s.sym+'</small></span></span></a>'}).join(''):'<div style="padding:12px" class="co">No stock found for “'+e.target.value+'”.</div>';
+};
+$('#res').onclick=function(){$('#res').style.display='none';$('#q').value=''};
+$('#v-stock').addEventListener('click',function(e){
+  if(e.target.dataset.side){side=e.target.dataset.side;ticket()}
+  if(e.target.id==='go')place();
 });
-document.addEventListener('click',async e=>{
-  const button=e.target.closest('[data-cancel]'); if(!button)return;
-  button.disabled=true;
-  try {await api('/orders/'+encodeURIComponent(button.dataset.cancel),{method:'DELETE'});await refresh();}
-  catch(err){alert(err.message);button.disabled=false;}
+$('#v-stock').addEventListener('input',function(e){if(e.target.id==='ot'&&$('#ot').value==='Limit')$('#ol').value=by[cur].price.toFixed(2);ticket()});
+document.addEventListener('click',function(e){
+  if(e.target.id==='in'||e.target.id==='cta')$('#dlg').showModal();
+  if(e.target.id==='out'){user=null;try{localStorage.removeItem('cm_user')}catch(x){}renderAuth();location.hash='#explore';route()}
 });
-$('refreshBtn').addEventListener('click',refresh);
-$('symbolFilter').addEventListener('change',refresh);
-$('bookSymbol').addEventListener('change',refreshBook);
-$('bookSymbol').addEventListener('keydown',e=>{if(e.key==='Enter')refreshBook()});
-refresh(); setInterval(refresh,5000);
+$('#cx').onclick=function(){$('#dlg').close()};
+$('#lf').onsubmit=function(){
+  var em=$('#em').value.trim();user=mkUser(em);try{localStorage.setItem('cm_user',em)}catch(x){}
+  renderAuth();if(cur)ticket();else{location.hash='#dashboard';route()}
+};
+$('#tabs').onclick=function(e){
+  var t=e.target.dataset.t;if(!t)return;
+  this.querySelectorAll('button').forEach(function(b){b.className=b.dataset.t===t?'on':''});
+  ['hold','ord','pay','copy'].forEach(function(k){$('#t-'+k).hidden=k!==t});
+};
+$('#payf').onsubmit=function(e){
+  e.preventDefault();var a=parseFloat($('#amt').value),out=e.submitter&&e.submitter.dataset.a==='out',m=$('#pmsg');
+  if(!a||a<100){m.textContent='Enter an amount of at least ₹100.';m.className='msg dn';return}
+  if(out&&a>acct.wallet){m.textContent='You can withdraw up to '+inr(acct.wallet)+'.';m.className='msg dn';return}
+  acct.wallet+=out?-a:a;
+  acct.pays.unshift([new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}),out?'Withdrawal to bank':'Added via '+$('#mth').value,out?-a:a,out?'Pending':'Done','CM'+Math.floor(Math.random()*9e6+1e6)]);
+  m.textContent=out?'Withdrawal of '+inr(a)+' requested.':inr(a)+' added to your wallet.';m.className='msg up';$('#amt').value='';renderDash();
+};
+$('#t-copy').onclick=function(e){var i=e.target.dataset.i;if(i===undefined)return;acct.traders[i].on=!acct.traders[i].on;renderDash()};
+
+/* ---------- start ---------- */
+var th=null;try{th=localStorage.getItem('cm_theme');var sv=localStorage.getItem('cm_user');if(sv)user=mkUser(sv)}catch(x){}
+setTheme(th||(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
+for(var i=0;i<100;i++)newTrade();
+renderAuth();renderExplore();route();
+setInterval(tick,1500);setInterval(newTrade,900);setInterval(syncEngine,5000);syncEngine();
 </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChronosMatch Footer</title>
+<style>
+/* ChronosMatch footer — follows the site's current theme */
+
+.cm-footer {
+  margin-top: 50px;
+  padding: 35px 2.5% 25px;
+  background: var(--bg);
+  color: var(--ink);
+  border-top: 1px solid var(--line);
+  transition: background .2s, color .2s;
+}
+
+.cm-footer-main {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1.2fr 1fr;
+  gap: 40px;
+  padding-bottom: 35px;
+}
+
+.cm-footer-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 25px;
+  font-weight: 700;
+  color: var(--hd);
+  text-decoration: none;
+}
+
+.cm-logo-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: var(--bink);
+  font-size: 22px;
+}
+
+.cm-footer-description {
+  max-width: 390px;
+  margin: 22px 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.cm-footer-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  margin: 28px 0;
+}
+
+.cm-footer-contact a {
+  color: var(--ink);
+  border-bottom: 1px dashed var(--muted);
+  padding-bottom: 5px;
+}
+
+.cm-footer a {
+  text-decoration: none;
+  transition: color .2s;
+}
+
+.cm-social-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 20px 0 45px;
+}
+
+.cm-social-links a,
+.cm-footer-column a,
+.cm-market-grid a {
+  color: var(--muted);
+}
+
+.cm-footer a:hover {
+  color: var(--brand);
+}
+
+.cm-copyright {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 25px;
+}
+
+.cm-footer-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.cm-footer-column h3 {
+  margin: 8px 0 12px;
+  color: var(--hd);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.cm-footer-column a {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.cm-market-links {
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+}
+
+.cm-market-tabs {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  overflow-x: auto;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 25px;
+}
+
+.cm-market-tabs span {
+  padding: 12px 15px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.cm-market-tabs .active {
+  border-bottom: 2px solid var(--hd);
+  color: var(--hd);
+  font-weight: 600;
+}
+
+.cm-market-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 22px 30px;
+  padding-bottom: 30px;
+}
+
+.cm-market-grid a {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.cm-footer-disclaimer {
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.cm-footer-disclaimer strong {
+  color: var(--hd);
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+  .cm-footer-main {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 30px;
+  }
+
+  .cm-footer-brand {
+    grid-column: 1 / -1;
+  }
+
+  .cm-market-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Mobile */
+@media (max-width: 520px) {
+  .cm-footer {
+    padding: 25px 16px;
+  }
+
+  .cm-footer-main {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px 18px;
+  }
+
+  .cm-footer-brand {
+    grid-column: 1 / -1;
+  }
+
+  .cm-footer-logo {
+    font-size: 22px;
+  }
+
+  .cm-footer-description {
+    font-size: 13px;
+  }
+
+  .cm-social-links {
+    margin-bottom: 28px;
+  }
+
+  .cm-footer-column {
+    gap: 12px;
+  }
+
+  .cm-footer-column h3 {
+    font-size: 12px;
+  }
+
+  .cm-footer-column a,
+  .cm-market-grid a {
+    font-size: 12px;
+  }
+
+  .cm-market-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+}
+</style>
+
+</head>
+
+<body>
+
+  <footer class="cm-footer">
+
+    <div class="cm-footer-main">
+
+      <!-- Brand and Description -->
+      <div class="cm-footer-brand">
+        <a href="#explore" class="cm-footer-logo">
+          <span class="cm-logo-icon">C</span>
+          ChronosMatch
+        </a>
+
+        <p class="cm-footer-description">
+          ChronosMatch is a low-latency trading-engine project designed
+          to explore stock-market workflows, order matching, portfolio
+          tracking, and copy-trading concepts through a simple interface.
+        </p>
+
+        <div class="cm-footer-contact">
+          <a href="mailto:support@chronosmatch.example">Contact Us</a>
+          <a href="#dashboard">Open Dashboard</a>
+        </div>
+
+        <div class="cm-social-links">
+          <a href="https://github.com/" target="_blank"
+             rel="noopener noreferrer">GitHub</a>
+          <a href="https://www.linkedin.com/" target="_blank"
+             rel="noopener noreferrer">LinkedIn</a>
+          <a href="https://www.youtube.com/" target="_blank"
+             rel="noopener noreferrer">YouTube</a>
+        </div>
+
+        <p class="cm-copyright">
+          © 2026 ChronosMatch. All rights reserved.
+        </p>
+      </div>
+
+      <!-- Project Links -->
+      <div class="cm-footer-column">
+        <h3>CHRONOSMATCH</h3>
+        <a href="#explore">About the Project</a>
+        <a href="#dashboard">Trading Dashboard</a>
+        <a href="#explore">Explore Markets</a>
+        <a href="#dashboard">Portfolio</a>
+        <a href="#dashboard">Copy Trading</a>
+      </div>
+
+      <!-- Trading Tools -->
+      <div class="cm-footer-column">
+        <h3>TRADING TOOLS</h3>
+        <a href="#explore">Stock Explorer</a>
+        <a href="#explore">Market Indices</a>
+        <a href="#explore">Market Activity</a>
+        <a href="#dashboard">Order History</a>
+        <a href="#dashboard">Holdings</a>
+      </div>
+
+      <!-- Technology -->
+      <div class="cm-footer-column">
+        <h3>TECHNOLOGY</h3>
+        <a href="#explore">Matching Engine</a>
+        <a href="#explore">Low-Latency Systems</a>
+        <a href="#explore">Order Book</a>
+        <a href="#explore">API Integration</a>
+        <a href="#explore">Project Overview</a>
+      </div>
+
+    </div>
+
+    <!-- Market Categories -->
+    <div class="cm-market-links">
+
+      <div class="cm-market-tabs">
+        <span class="active">Markets</span>
+        <span>Stocks</span>
+        <span>Indices</span>
+        <span>Trading</span>
+        <span>Technology</span>
+        <span>Resources</span>
+      </div>
+
+      <div class="cm-market-grid">
+        <a href="#explore">Explore Listed Companies</a>
+        <a href="#explore">Stock Price Dashboard</a>
+        <a href="#explore">Market Activity</a>
+        <a href="#explore">Trading Engine Demo</a>
+        <a href="#dashboard">Portfolio Dashboard</a>
+
+        <a href="#explore">Order Matching</a>
+        <a href="#explore">Price-Time Priority</a>
+        <a href="#explore">Limit Orders</a>
+        <a href="#dashboard">Order History</a>
+        <a href="#dashboard">Copy Trading Demo</a>
+      </div>
+
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="cm-footer-disclaimer">
+      <strong>Important:</strong>
+      ChronosMatch is a demonstration project, not a live brokerage
+      service. Market quotes, portfolio values, wallet balances, and
+      trader performance may be simulated. This website does not
+      provide investment advice.
+    </div>
+
+  </footer>
+
+</body>
+</html>
+<div class="box pad" style="margin-top:16px">
+  <h2 style="font-size:18px;margin-bottom:8px">
+    About ChronosMatch
+  </h2>
+
+  <p style="margin:0">
+    ChronosMatch is a trading-engine project with a clean,
+    accessible interface for exploring stock-market workflows.
+    It brings stock discovery, order entry, portfolio views, and
+    copy-trading concepts together while providing a frontend
+    connection to the ChronosMatch API.
+  </p>
+
+  <p class="note" style="margin:10px 0 0">
+    This is a demonstration interface, not a live brokerage service
+    or investment recommendation. Prices, wallet balances, portfolio
+    holdings, and trader performance shown here may be simulated.
+    Trading involves risk.
+  </p>
+</div>
