@@ -339,7 +339,7 @@ var trades=[],total=0,cur=null,side='BUY',user=null,oid=1000;
 var engine={online:false,stats:null,orders:[],trades:[],symbols:[],health:null};
 var API_BASE=(document.querySelector('meta[name="chronosmatch-api"]')||{}).content||'';
 function apiUrl(path){return API_BASE.replace(/\/$/,'')+path}
-async function fetchLivePrice(symbol) {
+async function LivePrice(symbol) {
     try {
         const response = await fetch(
             `/market/price/${encodeURIComponent(symbol)}`
@@ -369,6 +369,25 @@ async function fetchLivePrice(symbol) {
         console.error("Live price error:", error);
     }
 }
+const WATCHLIST = [
+    "TCS",
+    "INFY",
+    "RELIANCE",
+    "HDFCBANK",
+    "ICICIBANK"
+];
+
+async function refreshMarketPrices() {
+    for (const symbol of WATCHLIST) {
+        await LivePrice(symbol);
+    }
+}
+
+// Initial price fetch
+refreshMarketPrices();
+
+// Refresh every 30 seconds
+setInterval(refreshMarketPrices, 30000);
 async function engineApi(path,options){
   var res=await fetch(apiUrl(path),Object.assign({headers:{'Content-Type':'application/json'}},options||{}));
   var data={};try{data=await res.json()}catch(e){}
@@ -378,7 +397,7 @@ async function engineApi(path,options){
 async function syncEngine(){
   try{
     var r=await Promise.all([engineApi('/health'),engineApi('/stats'),engineApi('/orders?active_only=false'),engineApi('/trades?limit=30'),engineApi('/symbols')]);
-    engine.health=r[0];engine.stats=r[1];engine.orders=r[2].orders||[];engine.trades=r[3].trades||[];engine.symbols=r[4].symbols||[];engine.online=true;
+    engine.health=r[0];engine.stats=r[1];engine.orders=r[2].orders||[];engine.trades=r[3].trades||[];renderTape('#tape');engine.symbols=r[4].symbols||[];engine.online=true;
     $('#engineStatus').textContent='Engine: online';$('#engineStatus').className='note up';
     $('#apiNote').textContent='Connected to ChronosMatch API. Backend orders are shown in the Orders tab.';
     if(!$('#v-dashboard').hidden&&user)renderDash(true);
@@ -393,7 +412,7 @@ var acct={wallet:124500,hold:{TCS:[12,3610],INFY:[40,1420],HDFCBANK:[25,1590],IT
  pays:[['21 Oct 2026','Added via UPI',25000,'Done','CM2310481'],['14 Oct 2026','Withdrawal to HDFC ••4412',-15000,'Done','CM2309977'],['02 Oct 2026','Added via Net banking',50000,'Done','CM2307120'],['28 Sep 2026','Withdrawal to HDFC ••4412',-8000,'Pending','CM2306554']],
  traders:[{n:'Meera Iyer',r:'+24.6%',f:'18,420',k:'Medium',on:true},{n:'Rohit Sharma',r:'+31.9%',f:'9,870',k:'High',on:false},{n:'Sana Qureshi',r:'+12.3%',f:'26,015',k:'Low',on:false}]};
 
-function av(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%360;return '<span class="av" style="background:hsl('+h+',45%,45%)">'+s.slice(0,2)+'</span>'}
+function av(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%360;return '<span class="av" style="background:hsl('+h+',45%,45%)">'+s.slice(0,100)+'</span>'}
 
 /* ---------- market simulation ---------- */
 function tick(){
@@ -412,16 +431,74 @@ function newTrade(){
   if(trades.length>1000)trades.pop();
   renderTape('#tape',null);if(cur)renderTape('#sfeed',cur);
 }
-function renderTape(id,sym){
-  var e=$(id);if(!e)return;
-  var l=trades.filter(function(t){return !sym||t.sym===sym}).slice(0,100);
-  e.innerHTML=l.map(function(t){return '<div><span class="t">'+t.t+'</span><span><b>'+t.sym+'</b> <span class="co">'+t.who+'</span></span><span class="'+(t.side==='BUY'?'up':'dn')+'">'+t.side+' '+t.q+'</span><span class="num">'+fmt(t.p)+'</span></div>'}).join('')||'<div><span class="co" style="grid-column:1/-1">Waiting for the next trade…</span></div>';
+function renderTape(id, sym) {
+    const element = document.querySelector(id);
+    if (!element) return;
+
+    // Actual backend executions
+    const backendTrades = (engine.trades || []).map(t => ({
+        symbol: t.symbol,
+        side: t.side || "BUY",
+        quantity: Number(t.quantity || 0),
+        price: Number(t.price || 0),
+        timestamp: t.timestamp || t.created_at,
+        source: "Executed"
+    }));
+
+    // Simulated trades from the existing demo engine
+    const demoTrades = trades.map(t => ({
+        symbol: t.sym,
+        side: t.side,
+        quantity: t.q,
+        price: Number(t.p),
+        timestamp: t.t,
+        source: "Demo"
+    }));
+
+    const allTrades = [
+        ...demoTrades,
+        ...backendTrades
+    ];
+
+    const filtered = allTrades
+        .filter(t => !sym || t.symbol === sym)
+        .slice(0, 100);
+
+    if (!filtered.length) {
+        element.innerHTML =
+            '<div class="co" style="padding:15px">Waiting for trades...</div>';
+        return;
+    }
+
+    element.innerHTML = filtered.map(t => {
+        const time = t.timestamp
+            ? (Number.isNaN(Date.parse(t.timestamp))
+                ? t.timestamp
+                : new Date(t.timestamp).toLocaleTimeString("en-IN", {
+                    hour12: false
+                }))
+            : "--:--:--";
+
+        return `
+            <div>
+                <span class="t">${time}</span>
+                <span>
+                    <b>${t.symbol}</b>
+                    <span class="co">${t.source}</span>
+                </span>
+                <span class="${t.side === "SELL" ? "dn" : "up"}">
+                    TRADE ${t.quantity}
+                </span>
+                <span>₹${t.price.toFixed(2)}</span>
+            </div>
+        `;
+    }).join("");
 }
 
 /* ---------- explore ---------- */
 function renderExplore(){
   $('#idx').innerHTML=indices.map(function(x){var c=(x.v/x.o-1)*100;return '<div class="box idx"><b>'+x.n+'</b><span class="num"><b>'+fmt(x.v)+'</b><br><span class="'+cls(c)+'">'+sg(x.v-x.o)+' ('+sg(c)+'%)</span></span></div>'}).join('');
-  $('#top').innerHTML=stocks.slice().sort(function(a,b){return b.vol-a.vol}).slice(0,4).map(function(s){
+  $('#top').innerHTML=stocks.slice().sort(function(a,b){return b.vol-a.vol}).slice(0,100).map(function(s){
     return '<a class="box card" href="#stock/'+s.sym+'">'+av(s.sym)+'<b>'+s.name+'</b><div class="p">'+inr(s.price)+'</div><span class="'+cls(s.chg)+'">'+sg(s.chg)+'%</span></a>'}).join('');
   $('#mk tbody').innerHTML=stocks.map(function(s){
     var f=s.f>0?'fu':s.f<0?'fd':'';s.f=0;var pc=Math.round(s.b/(s.b+s.s)*100);
@@ -541,7 +618,7 @@ $('#tg').onclick=function(){setTheme(document.documentElement.getAttribute('data
 $('#mk').onclick=function(e){var r=e.target.closest('tr[data-s]');if(r)location.hash='#stock/'+r.dataset.s};
 $('#q').oninput=function(e){
   var t=e.target.value.toLowerCase().trim(),r=$('#res');
-  var l=t?stocks.filter(function(s){return (s.sym+s.name).toLowerCase().indexOf(t)>-1}).slice(0,6):[];
+  var l=t?stocks.filter(function(s){return (s.sym+s.name).toLowerCase().indexOf(t)>-1}).slice(0,100):[];
   r.style.display=t?'block':'none';
   r.innerHTML=l.length?l.map(function(s){return '<a href="#stock/'+s.sym+'">'+av(s.sym)+'<span class="nm"><span><b>'+s.name+'</b><small>'+s.sym+'</small></span></span></a>'}).join(''):'<div style="padding:12px" class="co">No stock found for “'+e.target.value+'”.</div>';
 };
@@ -578,9 +655,14 @@ $('#t-copy').onclick=function(e){var i=e.target.dataset.i;if(i===undefined)retur
 /* ---------- start ---------- */
 var th=null;try{th=localStorage.getItem('cm_theme');var sv=localStorage.getItem('cm_user');if(sv)user=mkUser(sv)}catch(x){}
 setTheme(th||(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
-for(var i=0;i<100;i++)newTrade();
 renderAuth();renderExplore();route();
-setInterval(tick,1500);setInterval(newTrade,900);setInterval(syncEngine,5000);syncEngine();
+// Generate 100 initial demo trades
+for (let i = 0; i < 100; i++) {
+    newTrade();
+}
+// Continue generating demo trades every second
+setInterval(newTrade, 1000);
+setInterval(syncEngine,5000);syncEngine();
 </script>
 </body>
 </html>
