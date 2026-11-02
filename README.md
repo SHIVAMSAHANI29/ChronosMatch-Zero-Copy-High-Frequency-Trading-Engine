@@ -592,3 +592,246 @@ The project provides a foundation for exploring low-latency systems engineering,
 
 *ChronosMatch — Engineering the path from Python orchestration to native-speed market logic.*
 
+# ChronosMatch – Week 3: C-Level Optimization & Latency Metrics
+
+**Project:** ChronosMatch – Zero-Copy High-Frequency Trading Engine  
+**Week:** 3  
+**Domain:** FinTech | High-Frequency Trading | Low-Latency Systems  
+**Focus:** Cython Optimization, GIL Management, Garbage Collection Control & Latency Benchmarking
+
+---
+
+## 1. Overview
+
+Week 3 focuses on optimizing the ChronosMatch matching engine at the C level using Cython.
+
+The primary objective is to reduce Python runtime overhead, minimize object interactions inside the critical matching loop, and achieve predictable low-latency trade execution.
+
+In addition, high-resolution timestamps are introduced using Python's `time.perf_counter_ns()` to measure the time taken by orders to enter and exit the matching engine.
+
+## 2. Week 3 Objectives
+
+- Optimize the existing Cython matching engine.
+- Replace Python objects with statically typed C variables wherever practical.
+- Minimize Python interpreter interactions inside the matching loop.
+- Reduce memory allocation and unnecessary object creation.
+- Understand and manage Global Interpreter Lock (GIL) behavior.
+- Control garbage collection overhead.
+- Implement nanosecond-resolution latency tracking.
+- Benchmark order processing and trade execution performance.
+
+## 3. C-Level Optimization
+
+### 3.1 Static C-Type Declarations
+
+Cython supports static variable declarations that allow critical calculations to execute using C-level operations rather than Python objects.
+
+Example:
+
+```cython
+cdef long long order_id
+cdef double price
+cdef int quantity
+cdef int matched_quantity
+```
+
+These declarations reduce dynamic type checking and Python object overhead.
+
+### 3.2 Optimizing the Matching Loop
+
+The matching loop is the most performance-sensitive component of ChronosMatch.
+
+Optimization strategies:
+
+- Use C-level variables for price and quantity calculations.
+- Avoid unnecessary Python function calls.
+- Minimize object creation inside the matching loop.
+- Reduce repeated memory allocations.
+- Use efficient data structures.
+- Keep the critical execution path as short as possible.
+
+### 3.3 GIL Management
+
+The Global Interpreter Lock (GIL) controls access to Python objects in CPython.
+
+Cython allows certain C-level operations to execute without holding the GIL using `nogil`.
+
+Example:
+
+```cython
+cdef int calculate_fill(
+    int buy_quantity,
+    int sell_quantity
+) noexcept nogil:
+
+    if buy_quantity < sell_quantity:
+        return buy_quantity
+
+    return sell_quantity
+```
+
+**Important:** The matching engine must use GIL-free execution only for operations that do not access Python objects or Python APIs.
+
+## 4. Garbage Collection Optimization
+
+Python's garbage collector handles cyclic references, but Python object allocation and reference counting can introduce runtime overhead.
+
+Optimization techniques:
+
+- Avoid unnecessary Python object creation.
+- Reuse preallocated data structures.
+- Minimize temporary objects.
+- Use C-level memory structures where appropriate.
+- Keep Python object interactions outside performance-critical operations.
+
+Note: CPython reference counting and cyclic garbage collection are different mechanisms. Disabling cyclic garbage collection does not eliminate all Python memory-management overhead.
+
+## 5. Latency Metrics Tracking
+
+ChronosMatch introduces high-resolution latency measurement using:
+
+```python
+import time
+
+start_time = time.perf_counter_ns()
+
+# Execute matching engine
+engine.process_order(order)
+
+end_time = time.perf_counter_ns()
+
+latency_ns = end_time - start_time
+
+print(f"Execution Latency: {latency_ns} ns")
+print(f"Execution Latency: {latency_ns / 1000:.2f} µs")
+```
+
+### Metrics to Track
+
+| Metric | Description |
+|---|---|
+| Order Entry Time | Timestamp when an order enters the engine |
+| Execution Time | Timestamp when matching completes |
+| Latency (ns) | Total measured execution duration |
+| Average Latency | Average execution time |
+| Minimum Latency | Fastest execution |
+| Maximum Latency | Slowest execution |
+| P95 Latency | 95th percentile execution time |
+| P99 Latency | 99th percentile execution time |
+| Throughput | Orders processed per second |
+
+## 6. Performance Benchmarking
+
+Compare the optimized Cython engine with the original Python implementation.
+
+Benchmark scenarios:
+
+1. Single order processing.
+2. 10,000 order executions.
+3. 100,000 order executions.
+4. One million order processing operations.
+5. Heavy matching workloads.
+6. Partial order matching.
+
+Example benchmark:
+
+```python
+import time
+import statistics
+
+latencies = []
+
+for i in range(100000):
+    start = time.perf_counter_ns()
+
+    engine.process_order(generate_order(i))
+
+    end = time.perf_counter_ns()
+
+    latencies.append(end - start)
+
+print("Average:", statistics.mean(latencies))
+print("Minimum:", min(latencies))
+print("Maximum:", max(latencies))
+print("P95:", sorted(latencies)[int(len(latencies) * 0.95)])
+print("P99:", sorted(latencies)[int(len(latencies) * 0.99)])
+```
+
+## 7. Expected Project Structure
+
+```text
+ChronosMatch/
+│
+├── src/
+│   ├── api.py
+│   ├── config.py
+│   ├── main.py
+│   ├── matching_engine.py
+│   ├── matching_engine.pyx
+│   ├── models.py
+│   ├── order_book.py
+│   ├── persistence.py
+│   └── latency_metrics.py
+│
+├── benchmarks/
+│   ├── benchmark_python.py
+│   └── benchmark_cython.py
+│
+├── tests/
+│   ├── test_matching.py
+│   └── test_latency.py
+│
+├── setup.py
+├── requirements.txt
+└── README.md
+```
+
+## 8. Expected Results
+
+By the end of Week 3, ChronosMatch should demonstrate:
+
+- A Cython-optimized matching engine.
+- Reduced Python object interactions in the critical matching loop.
+- Improved execution efficiency.
+- Appropriate GIL management.
+- Nanosecond-resolution latency measurement.
+- Average, minimum, maximum, P95 and P99 latency reports.
+- Python versus Cython performance comparison.
+
+**Performance targets are experimental goals, not guaranteed results.** Actual latency depends on hardware, operating system, workload, memory allocation, and benchmarking methodology.
+
+## 9. Verification & Testing
+
+The following tests should be completed:
+
+- Verify correct price-time priority matching.
+- Verify partial order execution.
+- Verify order quantity consistency.
+- Verify no invalid trades occur during optimization.
+- Compare Python and Cython outputs.
+- Measure latency under different workloads.
+- Check performance under sustained order processing.
+
+## 10. Week 3 Deliverables
+
+| Deliverable | Status |
+|---|---|
+| Cython matching engine optimization | Planned |
+| C-level variable declarations | Planned |
+| GIL optimization | Planned |
+| Garbage collection overhead reduction | Planned |
+| Nanosecond latency tracking | Planned |
+| Benchmarking framework | Planned |
+| Python vs Cython comparison | Planned |
+
+## 11. Final Outcome
+
+Week 3 transforms ChronosMatch from a functional matching engine into a more performance-oriented trading system.
+
+By combining Cython's C-level execution capabilities with efficient memory management and high-resolution latency measurement, the project aims to demonstrate practical low-latency systems engineering within the Python ecosystem.
+
+**ChronosMatch – Building the foundation for high-performance trading systems.**
+
+---
+
+**Technologies:** Python | Cython | C | mmap | struct | asyncio | SQLite | time.perf_counter_ns()</text>
