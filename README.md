@@ -36,8 +36,8 @@ and records every executed trade.
 
 ```powershell
 cd ChronosMatch
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+python -m venv \.venv\Scripts\Activate.ps1
+
 ```
 
 No `pip install` is needed. `requirements.txt` has no packages in Week 1.
