@@ -72,3 +72,8 @@ python -m pytest -v
 ```
 
 The API tests use an injected in-memory engine and do not touch your normal SQLite database.
+
+CHRONOSMATCH - IPC AUDIT
+python -m tests.ipc_audit
+
+python tests/ipc_audit.py --orders 1000000 2>&1 | Tee-Object -FilePath .\ipc_audit_results.txt
